@@ -10,6 +10,7 @@ import Graphql from "@/providers/graphql";
 
 const inter = Inter({ subsets: ["latin"] });
 
+
 export const metadata: Metadata = {
   title: "Gurubook",
   description: "Gurubook",
