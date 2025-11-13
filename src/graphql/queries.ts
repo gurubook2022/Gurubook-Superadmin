@@ -1,0 +1,167 @@
+import { gql } from '@apollo/client';
+
+export const HELLO = gql`
+query Query {
+    hello
+  }
+`;
+
+
+export const GET_ALL_QUESTIONS = `query GetQuestions($type: QuestionFor!) {
+  getQuestions(type: $type)
+}
+`
+
+export const GET_SOLO_QUESTION_DETAILS = `query GetSoloQuestionDetails($_id: ID!) {
+  getSoloQuestionDetails(_id: $_id) 
+}`
+
+
+export const GET_VIDEO_QUESTION_DETAILS = `query GetImageQuestionDetails($_id: ID!) {
+  getVideoQuestionDetails(_id: $_id) 
+}
+`
+
+export const GET_NUMERICAL_QUESTION_DETAILS = `query GetNumericalQuestionDetails($_id: ID!) {
+  getNumericalQuestionDetails(_id: $_id) 
+}`
+
+
+export const GET_IMAGE_QUESTION_DETAILS = `query GetImageQuestionDetails($_id: ID!) {
+  getImageQuestionDetails(_id: $_id) 
+}`
+
+export const GET_BKF_SOLO_QUESTION_DETAILS = `query GetBkfSoloQuestionDetails($_id: ID!) {
+  getBkfSoloQuestionDetails(_id: $_id)
+}`
+
+export const GET_ALL_ADMINS = `
+query Query {
+  getAllAdmins {
+    _id
+    firstName
+    lastName
+    email
+    role
+    createdAt
+  }
+}`
+
+
+export const GET_ADMINS_DETAILS = `
+query GetAdminDetails($id: String!) {
+  getAdminDetails(_id: $id) {
+    _id
+    firstName
+    lastName
+    email
+    role
+    createdAt
+    updatedAt
+  }
+}`
+
+export const GET_ALL_USERS = `query GetAllUsers {
+  getAllUsers {
+    _id
+    firstName
+    lastName
+    email
+    role
+    isVerified
+    status
+    createdAt
+    updatedAt
+    payment {
+      _id
+      method
+      paymentId
+      amount
+      userId
+      languageCode
+      createdAt
+      updatedAt
+    }
+    address {
+      country
+      address
+      postalCode
+      city
+    }
+    examLanguage
+    learningLanguage
+    classes
+  }
+}`
+
+export const GET_USERS_REGISTERED_BY_ADMIN = `query GetUsersRegisteredByAdmin($adminId: String) {
+  getUsersRegisteredByAdmin(adminId: $adminId) {
+    _id
+    firstName
+    lastName
+    email
+    role
+    isVerified
+    status
+    createdAt
+    updatedAt
+    payment {
+      _id
+      method
+      paymentId
+      amount
+      userId
+      languageCode
+      createdAt
+      updatedAt
+    }
+    address {
+      country
+      address
+      postalCode
+      city
+    }
+    examLanguage
+    learningLanguage
+    classes
+  }
+}`
+
+export const GET_PRICES = `query GetPrices {
+  getPrices {
+    _id
+    vat
+    dlApprovedLanguages
+    dlNonApprovedLanguages
+    bkfApprovedLanguages
+    bkfNonApprovedLanguages
+    createdAt
+    updatedAt
+  }
+}`
+
+export const GET_ADMIN_PAYMENTS = `query GetAdminPayments($adminId: ID!) {
+  getAdminPayments(adminId: $adminId) {
+    _id
+    amount
+    adminId
+    createdAt
+    updatedAt
+  }
+}`
+
+export const GET_BKF_IMAGE_QUESTION_DETAILS = `query GetBkfImageQuestionDetails($_id: ID!) {
+  getBkfImageQuestionDetails(_id: $_id) 
+}`
+
+export const GET_BKF_NUMERICAL_QUESTION = `query GetBkfNumericalQuestionDetails($_id: ID!) {
+  getBkfNumericalQuestionDetails(_id: $_id) 
+}`
+
+export const GET_LANGUAGES_CHART_DATA = `query GetLanguagesChartData {
+  getLanguagesChartData {
+    languageTitle
+    languageCode
+    count
+  }
+}`
