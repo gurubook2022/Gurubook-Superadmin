@@ -6,24 +6,24 @@ export async function POST(request: NextRequest) {
     try {
         // Log environment variables (without exposing secrets)
         console.log("S3 Config:", {
-            region: process.env.S3_REGION,
-            bucket: process.env.S3_BUCKET_NAME,
-            hasAccessKey: !!process.env.S3_ACCESS_KEY,
-            hasSecretKey: !!process.env.S3_SECRET_ACCESS_KEY,
+            region: process.env.S3_AWS_REGION,
+            bucket: process.env.S3_AWS_BUCKET_NAME,
+            hasAccessKey: !!process.env.S3_AWS_ACCESS_KEY,
+            hasSecretKey: !!process.env.S3_AWS_SECRET_ACCESS_KEY,
         });
 
         const { fileName, fileType, folder } = await request.json();
         console.log("Request payload:", { fileName, fileType, folder });
 
-        if (!process.env.S3_REGION || !process.env.S3_ACCESS_KEY || !process.env.S3_SECRET_ACCESS_KEY || !process.env.S3_BUCKET_NAME) {
+        if (!process.env.S3_AWS_REGION || !process.env.S3_AWS_ACCESS_KEY || !process.env.S3_AWS_SECRET_ACCESS_KEY || !process.env.S3_AWS_BUCKET_NAME) {
             throw new Error("Missing S3 environment variables");
         }
 
         const s3Client = new S3Client({
-            region: process.env.S3_REGION,
+            region: process.env.S3_AWS_REGION,
             credentials: {
-                accessKeyId: process.env.S3_ACCESS_KEY,
-                secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+                accessKeyId: process.env.S3_AWS_ACCESS_KEY,
+                secretAccessKey: process.env.S3_AWS_SECRET_ACCESS_KEY,
             },
         });
 
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         console.log("S3 Key:", key);
 
         const command = new PutObjectCommand({
-            Bucket: process.env.S3_BUCKET_NAME,
+            Bucket: process.env.S3_AWS_BUCKET_NAME,
             Key: key,
             ContentType: fileType,
         });
