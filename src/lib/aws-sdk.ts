@@ -17,8 +17,6 @@ const s3Client = new S3Client({
     requestChecksumCalculation: "WHEN_REQUIRED"
 });
 const uploadFileToAWSS3Bucket = async (file: File, folder: string) => {
-
-
     // Step 1: Get presigned URL from your backend
     const response = await fetch("/api/upload", {
         method: "POST",
@@ -35,18 +33,21 @@ const uploadFileToAWSS3Bucket = async (file: File, folder: string) => {
     }
 
     const { presignedUrl, key } = await response.json();
+    console.log("Presigned URL:", presignedUrl);
 
     // Step 2: Upload directly to S3 using presigned URL
     const uploadResponse = await fetch(presignedUrl, {
         method: "PUT",
         body: file,
-        headers: {
-            "Content-Type": file.type,
-        },
+        // Try without Content-Type header
     });
 
     if (!uploadResponse.ok) {
-        throw new Error("Failed to upload file");
+        // Get the error response text
+        const errorText = await uploadResponse.text();
+        console.error("S3 Upload Error:", errorText);
+        console.error("Status:", uploadResponse.status);
+        throw new Error(`Failed to upload file: ${errorText}`);
     }
 
     return key;
