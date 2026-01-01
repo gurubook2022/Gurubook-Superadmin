@@ -20,6 +20,7 @@ const Option = ({ optionDataIndex, option }: OptionProps) => {
       searchParams.get("lang") || "de"
     )
   );
+  const [showHighlightedWord, setShowHighlightedWord] = useState(false);
 
   useEffect(() => {
     setOptionIndex(
@@ -37,6 +38,11 @@ const Option = ({ optionDataIndex, option }: OptionProps) => {
       !watch(`options.${optionDataIndex}.isCorrect`)
     );
   };
+
+  // Get current highlighted word
+  const highlightedWordPath = `options.${optionDataIndex}.optionData.${optionIndex}.highlightedWord`;
+  const highlightedWord = watch(highlightedWordPath) || "";
+
   return (
     <div className="relative">
       <Button
@@ -71,51 +77,86 @@ const Option = ({ optionDataIndex, option }: OptionProps) => {
           </svg>
         )}
       </Button>
-      <Controller
-        control={control}
-        name={`options.${optionDataIndex}.optionData.${optionIndex}.content`}
-        render={({ field: { onChange } }) => (
-          <>
-            {/* <QuillEditor
-            onChange={onChange}
-            value={
-              watch(
-                `options.${optionDataIndex}.optionData.${optionIndex}.content`
-              ) || undefined
-            }
-            label={`Answer Option ${optionDataIndex + 1}`}
-            className="col-span-full mb-10 [&_.ql-editor]:min-h-[100px]"
-            labelClassName="font-medium text-gray-700 dark:text-gray-600 mb-1.5"
-            /> */}
-            <Popover
-              size="lg"
-              content={() =>
-                option?.optionData?.find((data) => data?.language === "en")
-                  ?.content
-              }
-              placement="top"
+      <div className="flex flex-col gap-2">
+        <Controller
+          control={control}
+          name={`options.${optionDataIndex}.optionData.${optionIndex}.content`}
+          render={({ field: { onChange } }) => (
+            <>
+              <Popover
+                size="lg"
+                content={() =>
+                  option?.optionData?.find((data) => data?.language === "en")
+                    ?.content
+                }
+                placement="top"
+              >
+                <Input
+                  label={`Answer Option ${optionDataIndex + 1}`}
+                  placeholder="Option Text"
+                  {...register(
+                    `options.${optionDataIndex}.optionData.${optionIndex}.content`
+                  )}
+                  value={watch(
+                    `options.${optionDataIndex}.optionData.${optionIndex}.content`
+                  )}
+                  onChange={(e) => {
+                    setValue(
+                      `options.${optionDataIndex}.optionData.${optionIndex}.content`,
+                      e.target.value
+                    );
+                  }}
+                  helperClassName="border-4"
+                />
+              </Popover>
+            </>
+          )}
+        />
+        
+        {/* Highlighted Word Section - Only show for correct answers */}
+        {watch(`options.${optionDataIndex}.isCorrect`) && (
+          <div className="ml-6">
+            <button
+              type="button"
+              onClick={() => setShowHighlightedWord(!showHighlightedWord)}
+              className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 mb-1"
             >
-              <Input
-                label={`Answer Option ${optionDataIndex + 1}`}
-                placeholder="Option Text"
-                {...register(
-                  `options.${optionDataIndex}.optionData.${optionIndex}.content`
-                )}
-                value={watch(
-                  `options.${optionDataIndex}.optionData.${optionIndex}.content`
-                )}
-                onChange={(e) => {
-                  setValue(
-                    `options.${optionDataIndex}.optionData.${optionIndex}.content`, // Field name
-                    e.target.value // New value from the input
-                  );
-                }}
-                helperClassName="border-4"
-              />
-            </Popover>
-          </>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={12}
+                height={12}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+              </svg>
+              {showHighlightedWord ? "Hide" : "Show"} Highlighted Word
+              {highlightedWord && (
+                <span className="ml-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs">
+                  {highlightedWord}
+                </span>
+              )}
+            </button>
+            
+            {showHighlightedWord && (
+              <div className="flex flex-col gap-1">
+                <Input
+                  label=""
+                  placeholder="Enter a single keyword (e.g., speed)"
+                  value={highlightedWord}
+                  onChange={(e) => setValue(highlightedWordPath, e.target.value.trim())}
+                  className="text-sm"
+                />
+              </div>
+            )}
+          </div>
         )}
-      />
+      </div>
     </div>
   );
 };

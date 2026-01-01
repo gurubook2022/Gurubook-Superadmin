@@ -22,7 +22,8 @@ export const bkfSoloQuestionFormSchema = z.object({
             _id: z.string().optional(),
             language: z.string(),
             content: z.string().optional(),
-            audio: z.string().optional()
+            audio: z.string().optional(),
+            highlightedWord: z.string().optional()
         })),
     })).nonempty({ message: "Options are required" }),
 });
