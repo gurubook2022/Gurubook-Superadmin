@@ -24,7 +24,8 @@ export const imageQuestionFormSchema = z.object({
             _id: z.string().optional(),
             language: z.string(),
             content: z.string(),
-            audio: z.string()
+            audio: z.string(),
+            highlightedWord: z.string().optional()
         })),
     })).nonempty({ message: "Options are required" }),
     imageUrl: z.string().min(1, { message: "Image is requried" })

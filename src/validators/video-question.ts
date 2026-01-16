@@ -21,7 +21,8 @@ export const videoQuestionFormSchema = z.object({
             _id: z.string().optional(),
             language: z.string(),
             content: z.string(),
-            audio: z.string()
+            audio: z.string(),
+            highlightedWord: z.string().optional()
         })),
     })),
     videoUrl: z.string().min(1, { message: "Video is required" }),

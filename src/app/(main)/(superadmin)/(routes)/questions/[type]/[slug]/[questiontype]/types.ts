@@ -21,8 +21,9 @@ export type QuestionT = DlQuestion | BKFQuestion;
 export type OptionData = {
     _id: string,
     language: string,
-    content: string
-    audio: string
+    content: string,
+    audio: string,
+    highlightedWord?: string
 }
 
 export type Option = {
