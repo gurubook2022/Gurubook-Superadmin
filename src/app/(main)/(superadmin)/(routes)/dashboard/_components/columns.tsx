@@ -140,17 +140,17 @@ export const columns: ColumnDef<UserT>[] = [
       return value.includes(row.getValue(id));
     },
   },
-  {
-    id: "refund",
-    cell: ({ row }) => {
-      const createdAt: number = row.getValue("createdAt");
+  // {
+  //   id: "refund",
+  //   cell: ({ row }) => {
+  //     const createdAt: number = row.getValue("createdAt");
 
-      return <RefundPayment createdAt={createdAt} />;
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
+  //     return <RefundPayment createdAt={createdAt} />;
+  //   },
+  //   filterFn: (row, id, value) => {
+  //     return value.includes(row.getValue(id));
+  //   },
+  // },
   {
     id: "actions",
     cell: ({ row }) => {
