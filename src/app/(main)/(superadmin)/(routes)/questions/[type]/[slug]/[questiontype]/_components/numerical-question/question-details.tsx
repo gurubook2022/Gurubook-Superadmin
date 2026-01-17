@@ -1,15 +1,14 @@
 "use client";
 import { cn, getLanguageIndex, getLanguageName } from "@/lib/utils";
-import { DlQuestion } from "../../types";
+import { DlQuestion, QuestionData } from "../../types";
 import { Text, Title } from "@/components/ui/text";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Select from "react-select";
 import LanguagesSlider from "../languages-slider";
-import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   NumericalQuestionInput,
   numericalQuestionFormSchema,
@@ -19,6 +18,11 @@ import DeleteButton from "./delete-button";
 import { chapters } from "@/constants/chapters";
 import ImageUpload from "./image-upload";
 import { Popover } from "@/components/ui/popover";
+import { UPDATE_NUMERICAL_QUESTION } from "@/graphql/mutations";
+import { useMutation } from "@apollo/client";
+import { soloQuestionFormSchema } from "@/validators/solo-question";
+import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
 
 interface QuestionDetailsProps {
   data: DlQuestion;
@@ -26,35 +30,92 @@ interface QuestionDetailsProps {
 
 const QuestionDetails = ({ data }: QuestionDetailsProps) => {
   const searchParams = useSearchParams();
-  const [questionDataIndex, setQuestionDataIndex] = useState(
+  const { refresh } = useRouter();
+
+  const [updateNumericalQuestion, { loading: updateLoading }] =
+    useMutation(UPDATE_NUMERICAL_QUESTION);
+
+
+  // Transform data to ensure all fields exist with proper defaults
+  const defaultValues = useMemo(() => ({
+    points: data?.points ?? 0,
+    questionNumber: data?.questionNumber ?? "",
+    questionData: data?.questionData?.map((qd: any) => ({
+      _id: qd?._id ?? "",
+      language: qd?.language ?? "",
+      title: qd?.title ?? "",
+      titleAudio: qd?.titleAudio ?? "",
+      subTitle: qd?.subTitle ?? "",
+      subTitleAudio: qd?.subTitleAudio ?? "",
+      remarks: qd?.remarks ?? "",
+      remarksAudio: qd?.remarksAudio ?? "",
+      imageText: qd?.imageText ?? "",
+      imageTextAudio: qd?.imageTextAudio ?? "",
+      textInputQuestionOne: qd?.textInputQuestionOne ?? "",
+      textInputQuestionOneAudio: qd?.textInputQuestionOneAudio ?? "",
+      textInputQuestionTwo: qd?.textInputQuestionTwo ?? "",
+      textInputQuestionTwoAudio: qd?.textInputQuestionTwoAudio ?? "",
+      textInputQuestionThree: qd?.textInputQuestionThree ?? "",
+      textInputQuestionThreeAudio: qd?.textInputQuestionThreeAudio ?? "",
+    })) ?? [],
+    classes: data?.classes ?? [],
+    chapters: data?.chapters ?? [],
+    solution: data?.solution ?? "",
+    solution1: data?.solution1 ?? "",
+    imageUrl: data?.imageUrl ?? "",
+  }), [data]);
+
+
+
+  const questionDataIndex = useMemo(() =>
     getLanguageIndex(
       data?.questionData?.map((d) => d.language),
       searchParams.get("lang") || "de"
-    )
-  );
-
-  useEffect(() => {
-    setQuestionDataIndex(
-      getLanguageIndex(
-        data?.questionData?.map((d) => d.language),
-        searchParams.get("lang") || "de"
-      )
-    );
-  }, [data?.questionData, searchParams]);
+    ) || 0
+    , [data?.questionData, searchParams]);
 
   const methods = useForm<NumericalQuestionInput>({
     resolver: zodResolver(numericalQuestionFormSchema),
-    defaultValues: {
-      points: data?.points,
-      questionNumber: data?.questionNumber,
-      questionData: data?.questionData,
-      classes: data?.classes,
-      imageUrl: data?.imageUrl,
-      chapters: data?.chapters,
-    },
+    defaultValues
   });
 
-  const onSubmit = async (inputData: NumericalQuestionInput) => { };
+  // Reset form when data changes (e.g., after save or when navigating to different question)
+  useEffect(() => {
+    if (data?._id) {
+      methods.reset(defaultValues);
+    }
+  }, [data?._id]); // Only reset when the question ID changes, not on every data change
+
+  const onSubmit = async (inputData: NumericalQuestionInput) => {
+
+    try {
+      const result = await updateNumericalQuestion({
+        variables: {
+          _id: data?._id,
+          points: inputData?.points,
+          questionNumber: inputData?.questionNumber,
+          classes: inputData?.classes,
+          questionData: inputData?.questionData,
+          chapters: inputData?.chapters,
+          solution: inputData?.solution,
+          solution1: inputData?.solution1,
+          imageUrl: inputData?.imageUrl,
+        },
+      });
+
+      if (result.data?.updateDlQuestion === data?._id) {
+        toast.success("Question Updated Successfully", {
+          position: "bottom-left",
+        });
+        refresh();
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      toast.error("Failed to update question", {
+        position: "bottom-left",
+      });
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -64,7 +125,12 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
       <div>
         <FormProvider {...methods}>
           <form
-            onSubmit={methods.handleSubmit(onSubmit)}
+            onSubmit={(e) => {
+              e.preventDefault();
+              methods.handleSubmit(onSubmit, (errors) => {
+                console.log("Validation errors:", errors);
+              })(e);
+            }}
             className={cn("[&_label.block>span]:font-medium space-y-6")}
           >
             <div className="grid md:grid-cols-4 pb-6 border-b border-dashed border-gray-200 gap-10">
@@ -181,36 +247,34 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     size="lg"
                     content={() =>
                       data?.questionData?.find(
-                        (data) => data?.language === "en"
+                        (data: QuestionData) => data?.language === "en"
                       )?.title
                     }
                     placement="top"
                   >
-                    <Input
-                      label="Title"
-                      placeholder="Title"
-                      {...methods.register(
-                        `questionData.${questionDataIndex}.title`
+                    <Controller
+                      control={methods.control}
+                      name={`questionData.${questionDataIndex}.title`}
+                      render={({ field }) => (
+                        <Input
+                          label="Title"
+                          placeholder="Title"
+                          {...field}
+                          onMouseEnter={(e) => {
+                            if (e.isTrusted) {
+                              const audioUrl = methods.getValues(
+                                `questionData.${questionDataIndex}.titleAudio`
+                              );
+                              if (audioUrl) {
+                                const audio = new Audio();
+                                audio.src = audioUrl;
+                                audio.play();
+                              }
+                            }
+                          }}
+                          helperClassName="border-4"
+                        />
                       )}
-                      value={methods.watch(
-                        `questionData.${questionDataIndex}.title`
-                      )}
-                      onMouseEnter={(e) => {
-                        if (e.isTrusted) {
-                          if (
-                            methods.watch(
-                              `questionData.${questionDataIndex}.titleAudio`
-                            )
-                          ) {
-                            const audio = new Audio();
-                            audio.src = methods.watch(
-                              `questionData.${questionDataIndex}.titleAudio`
-                            );
-                            audio.play();
-                          }
-                        }
-                      }}
-                      helperClassName="border-4"
                     />
                   </Popover>
                   <Popover
@@ -241,7 +305,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                             const audio = new Audio();
                             audio.src = methods.watch(
                               `questionData.${questionDataIndex}.subTitleAudio`
-                            );
+                            )!;
                             audio.play();
                           }
                         }
@@ -298,7 +362,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                 <UploadZone name="" setValue={() => {}} getValues={() => {}} />
               </div> */}
 
-                <div className="gap-4 md:flex-row flex-col flex items-center">
+                <div className="gap-4 md:flex-row flex-col flex items-center !mb-6">
                   <Popover
                     size="lg"
                     content={() =>
@@ -412,48 +476,19 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     />
                   </Popover>
                 </div>
-                <Popover
-                  size="lg"
-                  content={() =>
-                    data?.questionData?.find((data) => data?.language === "en")
-                      ?.remarks
-                  }
-                  placement="top"
-                >
-                  <Textarea
-                    label="Remarks"
-                    placeholder="Remarks"
-                    {...methods.register(
-                      `questionData.${questionDataIndex}.remarks`
-                    )}
-                    value={
-                      methods.watch(
-                        `questionData.${questionDataIndex}.remarks`
-                      ) || undefined
-                    }
-                    onMouseEnter={(e) => {
-                      if (e.isTrusted) {
-                        if (
-                          methods.watch(
-                            `questionData.${questionDataIndex}.remarksAudio`
-                          )
-                        ) {
-                          const audio = new Audio();
-                          audio.src = methods.watch(
-                            `questionData.${questionDataIndex}.remarksAudio`
-                          );
-                          audio.play();
-                        }
-                      }
-                    }}
-                    helperClassName="border-4"
-                    className="!mb-10"
-                  />
-                </Popover>
               </div>
             </div>
             <div className="flex px-10 py-4 fixed bottom-0 right-0 backdrop-blur-3xl	 left-0   items-center justify-end gap-6">
               <DeleteButton _id={data?._id} />
+              <Button
+                isLoading={updateLoading}
+                disabled={updateLoading}
+                variant="solid"
+                color="primary"
+                type="submit"
+              >
+                Update
+              </Button>
             </div>
           </form>
         </FormProvider>

@@ -9,9 +9,9 @@ export const numericalQuestionFormSchema = z.object({
         _id: z.string().min(1, { message: "_id is required" }),
         language: z.string().min(1, { message: "Language is required" }),
         title: z.string().min(1, { message: "Title is required" }),
-        titleAudio: z.string(),
-        subTitle: z.string(),
-        subTitleAudio: z.string(),
+        titleAudio: z.string().optional(),
+        subTitle: z.string().optional(),
+        subTitleAudio: z.string().optional(),
         remarks: z.string().optional().nullable(),
         remarksAudio: z.string(),
         textInputQuestionOne: z.string().optional(),
@@ -32,6 +32,8 @@ export const numericalQuestionFormSchema = z.object({
   chapters: z
     .array(z.string())
     .nonempty({ message: "Atleast one chapter is required" }),
+  solution: z.string(),
+  solution1: z.string().optional(),
   imageUrl: z.string().optional(),
 });
 

@@ -57,6 +57,7 @@ export type DlQuestion = {
     points: number,
     classes: string[],
     solution?: string,
+    solution1?: string,
     videoUrl?: string,
     startImageUrl?: string,
     endImageUrl?: string,
