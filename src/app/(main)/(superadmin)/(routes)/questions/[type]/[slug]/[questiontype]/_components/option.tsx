@@ -14,6 +14,9 @@ interface OptionProps {
 
 const Option = ({ optionDataIndex, option }: OptionProps) => {
   const searchParams = useSearchParams();
+  const currentLang = searchParams.get("lang") || "de";
+
+
   const [optionIndex, setOptionIndex] = useState(
     getLanguageIndex(
       option?.optionData?.map((opt) => opt?.language),
@@ -23,13 +26,14 @@ const Option = ({ optionDataIndex, option }: OptionProps) => {
   const [showHighlightedWord, setShowHighlightedWord] = useState(false);
 
   useEffect(() => {
-    setOptionIndex(
-      getLanguageIndex(
-        option?.optionData?.map((opt) => opt?.language),
-        searchParams.get("lang") || "de"
-      )
+    const newIndex = getLanguageIndex(
+      option?.optionData?.map((opt) => opt?.language),
+      currentLang
     );
-  }, [option?.optionData, searchParams]);
+    setOptionIndex(newIndex);
+  }, [option?.optionData, currentLang]);
+
+
   const { register, watch, setValue, control } = useFormContext();
 
   const toggleIsCorrect = () => {
@@ -79,6 +83,7 @@ const Option = ({ optionDataIndex, option }: OptionProps) => {
       </Button>
       <div className="flex flex-col gap-2">
         <Controller
+          key={`${optionDataIndex}-${optionIndex}-${currentLang}`} // Force remount on language change
           control={control}
           name={`options.${optionDataIndex}.optionData.${optionIndex}.content`}
           render={({ field: { onChange } }) => (
@@ -112,7 +117,7 @@ const Option = ({ optionDataIndex, option }: OptionProps) => {
             </>
           )}
         />
-        
+
         {/* Highlighted Word Section - Only show for correct answers */}
         {watch(`options.${optionDataIndex}.isCorrect`) && (
           <div className="ml-6">
@@ -142,7 +147,7 @@ const Option = ({ optionDataIndex, option }: OptionProps) => {
                 </span>
               )}
             </button>
-            
+
             {showHighlightedWord && (
               <div className="flex flex-col gap-1">
                 <Input

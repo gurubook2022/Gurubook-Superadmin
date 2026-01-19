@@ -1,12 +1,12 @@
 "use client";
 import { cn, getLanguageIndex, getLanguageName } from "@/lib/utils";
-import { BKFQuestion } from "../../types";
+import { BKFQuestion, QuestionData } from "../../types";
 import { Text, Title } from "@/components/ui/text";
 import { Input } from "@/components/ui/input";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import LanguagesSlider from "../languages-slider";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Option from "../option";
 import { bkfClasses } from "@/constants/classes";
@@ -29,10 +29,12 @@ interface QuestionDetailsProps {
 
 const QuestionDetails = ({ data }: QuestionDetailsProps) => {
   const searchParams = useSearchParams();
+  const currentLang = searchParams.get("lang") || "de";
+
   const [questionDataIndex, setQuestionDataIndex] = useState(
     getLanguageIndex(
       data?.questionData?.map((d) => d.language),
-      searchParams.get("lang") || "de"
+      currentLang
     ) || 0
   );
 
@@ -45,22 +47,55 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
     setQuestionDataIndex(
       getLanguageIndex(
         data?.questionData?.map((d) => d.language),
-        searchParams.get("lang") || "de"
+        currentLang
       )
     );
-  }, [data?.questionData, searchParams]);
+  }, [data?.questionData, currentLang]);
+
+
+  // Transform data to ensure all fields exist with proper defaults
+  const defaultValues = useMemo(() => ({
+    points: data?.points ?? 0,
+    questionNumber: data?.questionNumber ?? "",
+    questionData: data?.questionData?.map((qd: any) => ({
+      _id: qd?._id ?? "",
+      language: qd?.language ?? "",
+      title: qd?.title ?? "",
+      titleAudio: qd?.titleAudio ?? "",
+      subTitle: qd?.subTitle ?? "",
+      subTitleAudio: qd?.subTitleAudio ?? "",
+      remarks: qd?.remarks ?? "",
+      remarksAudio: qd?.remarksAudio ?? "",
+    })) ?? [],
+    classes: data?.classes ?? [],
+    chapters: data?.chapters ?? [],
+    options: data?.options?.map((opt: any) => ({
+      _id: opt?._id ?? "",
+      isCorrect: opt?.isCorrect ?? false,
+      optionData: opt?.optionData?.map((od: any) => ({
+        _id: od?._id ?? "",
+        language: od?.language ?? "",
+        content: od?.content ?? "",
+        audio: od?.audio ?? "",
+        highlightedWord: od?.highlightedWord ?? "",
+      })) ?? [],
+    })) ?? [],
+  }), [data]);
+
 
   const methods = useForm<BkfSoloQuestionInput>({
     resolver: zodResolver(bkfSoloQuestionFormSchema),
-    defaultValues: {
-      points: data?.points,
-      questionNumber: data?.questionNumber,
-      questionData: data?.questionData,
-      classes: data?.classes,
-      options: data?.options,
-      chapters: data?.chapters,
-    },
+    defaultValues
   });
+
+
+
+  // Reset form when data changes (e.g., after save or when navigating to different question)
+  useEffect(() => {
+    if (data?._id) {
+      methods.reset(defaultValues);
+    }
+  }, [data?._id]); // Only reset when the question ID changes, not on every data change
 
   const onSubmit = async (inputData: BkfSoloQuestionInput) => {
     await updateBkfQuestion({
@@ -74,8 +109,8 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
         chapters: inputData?.chapters,
         questionType: "Bkf Solo"
       },
-      onCompleted: ({ updateSoloQuestion }) => {
-        if (updateSoloQuestion === data?._id) {
+      onCompleted: ({ updateBkfQuestion }) => {
+        if (updateBkfQuestion === data?._id) {
           toast.success("Question Updated Successfully", {
             position: "bottom-left",
           });
@@ -94,7 +129,12 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
       <div>
         <FormProvider {...methods}>
           <form
-            onSubmit={methods.handleSubmit(onSubmit)}
+            onSubmit={(e) => {
+              e.preventDefault();
+              methods.handleSubmit(onSubmit, (errors) => {
+                console.log("Validation errors:", errors);
+              })(e);
+            }}
             className={cn("[&_label.block>span]:font-medium space-y-6")}
           >
             <div className="grid md:grid-cols-4 pb-6 border-b border-dashed border-gray-200 gap-10">
@@ -211,44 +251,38 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     size="lg"
                     content={() =>
                       data?.questionData?.find(
-                        (data) => data?.language === "en"
+                        (data: any) => data?.language === "en"
                       )?.title
                     }
                     placement="top"
                   >
-                    <Input
-                      label="Title"
-                      placeholder="Title"
-                      {...methods.register(
-                        `questionData.${questionDataIndex}.title`
+                    <Controller
+                      key={`${questionDataIndex}-${currentLang}`}
+                      control={methods.control}
+                      name={`questionData.${questionDataIndex}.title`}
+                      render={({ field }) => (
+                        <Input
+                          label="Title"
+                          placeholder="Title"
+                          {...field}
+                          onMouseEnter={(e) => {
+                            if (e.isTrusted) {
+                              const audioUrl = methods.getValues(
+                                `questionData.${questionDataIndex}.titleAudio`
+                              );
+                              if (audioUrl) {
+                                const audio = new Audio();
+                                audio.src = audioUrl;
+                                audio.play();
+                              }
+                            }
+                          }}
+                          helperClassName="border-4"
+                        />
                       )}
-                      value={methods.watch(
-                        `questionData.${questionDataIndex}.title`
-                      )}
-                      onMouseEnter={(e) => {
-                        if (e.isTrusted) {
-                          if (
-                            methods.watch(
-                              `questionData.${questionDataIndex}.titleAudio`
-                            )
-                          ) {
-                            const audio = new Audio();
-                            audio.src = methods.watch(
-                              `questionData.${questionDataIndex}.titleAudio`
-                            );
-                            audio.play();
-                          }
-                        }
-                      }}
-                      onChange={(e) => {
-                        methods.setValue(
-                          `questionData.${questionDataIndex}.title`, // Field name
-                          e.target.value // New value from the input
-                        );
-                      }}
-                      helperClassName="border-4"
                     />
                   </Popover>
+
                 </div>
                 <div className="flex flex-col gap-4 !mb-10">
                   {data?.options?.map((optionData, optionDataIndex) => (

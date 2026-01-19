@@ -28,10 +28,11 @@ interface QuestionDetailsProps {
 }
 
 const QuestionDetails = ({ data }: QuestionDetailsProps) => {
+  const searchParams = useSearchParams();
+  const currentLang = searchParams.get("lang") || "de";
   const { refresh } = useRouter();
   const [updateSoloQuestion, { loading: updateLoading }] =
     useMutation(UPDATE_SOLO_QUESTION);
-  const searchParams = useSearchParams();
 
   // Transform data to ensure all fields exist with proper defaults
   const defaultValues = useMemo(() => ({
@@ -65,9 +66,9 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
   const questionDataIndex = useMemo(() =>
     getLanguageIndex(
       data?.questionData?.map((d) => d.language),
-      searchParams.get("lang") || "de"
+      currentLang
     ) || 0
-    , [data?.questionData, searchParams]);
+    , [data?.questionData, currentLang]);
 
   const methods = useForm<SoloQuestionInput>({
     resolver: zodResolver(soloQuestionFormSchema),
@@ -111,6 +112,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
 
   return (
     <div className="space-y-8">
+      <>Solo Question</>
       <Suspense fallback={<>loading ...</>}>
         <LanguagesSlider />
       </Suspense>
@@ -245,6 +247,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     placement="top"
                   >
                     <Controller
+                      key={`${questionDataIndex}-${currentLang}`}
                       control={methods.control}
                       name={`questionData.${questionDataIndex}.title`}
                       render={({ field }) => (
@@ -281,6 +284,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                   >
                     <Controller
                       control={methods.control}
+                      key={`${questionDataIndex}-${currentLang}`}
                       name={`questionData.${questionDataIndex}.subTitle`}
                       render={({ field }) => (
                         <Input

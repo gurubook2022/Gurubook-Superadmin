@@ -1,15 +1,17 @@
 "use client";
 import { MoveLeftIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 const BackButton = () => {
-  const { back, refresh } = useRouter();
+  const param = useParams()
+
+  const { push, refresh } = useRouter();
   return (
     <Button
       size="sm"
       onClick={() => {
-        back();
+        push(`/questions/${param.type}`);
         refresh();
       }}
       variant="outline"

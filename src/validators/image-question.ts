@@ -5,12 +5,13 @@ export const imageQuestionFormSchema = z.object({
     points: z.coerce.number().nonnegative({ message: "Points should be ≥ 0" }),
     questionNumber: z.string().min(1, { message: "Question number is required" }),
     questionData: z.array(z.object({
+        _id: z.string().optional(),
         language: z.string().min(1, { message: "Language is required" }),
         title: z.string().min(1, { message: "Title is required" }),
         titleAudio: z.string(),
         subTitle: z.string(),
         subTitleAudio: z.string(),
-        remarks: z.string().min(1, { message: "Remark is required" }),
+        remarks: z.string(),
         remarksAudio: z.string(),
         imageText: z.string(),
         imageTextAudio: z.string()

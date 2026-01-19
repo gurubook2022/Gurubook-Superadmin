@@ -116,16 +116,16 @@ export const DELETE_SOLO_QUESTION = gql`mutation DeleteSoloQuestion($_id: ID!) {
   deleteSoloQuestion(_id: $_id)
 }`
 
-export const UPDATE_IMAGE_QUESTION = gql`mutation UpdateImageQuestion($_id: ID!, $points: Float!, $questionNumber: String!, $classes: [String!]!,$chapters: [String!]!, $options: [OptionInput!]!, $questionData: [ImageQuestionDataInput!]!, $imageUrl: String!) {
-  updateImageQuestion(_id: $_id, points: $points, questionNumber: $questionNumber, classes: $classes, chapters: $chapters, options: $options, questionData: $questionData, imageUrl: $imageUrl)
+export const UPDATE_IMAGE_QUESTION = gql`mutation UpdateDlQuestion($_id: ID!, $points: Float!, $questionNumber: String!, $classes: [String!]!,$chapters: [String!]!, $options: [OptionInput!]!, $questionData: [QuestionDataInput!]!, $imageUrl: String!) {
+  updateDlQuestion(_id: $_id, points: $points, questionNumber: $questionNumber, classes: $classes, chapters: $chapters, options: $options, questionData: $questionData, imageUrl: $imageUrl)
 }`
 
 export const DELETE_IMAGE_QUESTION = gql`mutation DeleteImageQuestion($_id: ID!) {
   deleteImageQuestion(_id: $_id)
 }`
 
-export const UPDATE_NUMERICAL_QUESTION = gql`mutation UpdateNumericalQuestion($_id: ID!, $points: Float!, $solution: String, $solution1: String, $questionNumber: String!, $classes: [String!]!, $chapters: [String!]!, $questionData: [NumericalQuestionsDataInput!]!, $imageUrl: String) {
-  updateNumericalQuestion(_id: $_id, points: $points, solution: $solution, solution1: $solution1, questionNumber: $questionNumber, classes: $classes, chapters: $chapters, questionData: $questionData, imageUrl: $imageUrl)
+export const UPDATE_NUMERICAL_QUESTION = gql`mutation UpdateDlQuestion($_id: ID!, $points: Float!, $solution: String, $solution1: String, $questionNumber: String!, $classes: [String!]!, $chapters: [String!]!, $questionData: [QuestionDataInput!]!, $imageUrl: String) {
+  updateDlQuestion(_id: $_id, points: $points, solution: $solution, solution1: $solution1, questionNumber: $questionNumber, classes: $classes, chapters: $chapters, questionData: $questionData, imageUrl: $imageUrl)
 }`
 
 export const DELETE_NUMERICAL_QUESTION = gql`mutation DeleteNumericalQuestion($_id: ID!) {

@@ -8,7 +8,6 @@ interface BkfSoloQuestionProps {
 
 const BkfSoloQuestion = async ({ slug }: BkfSoloQuestionProps) => {
   const response = await getBkfSoloQuestionDetails(slug);
-  console.log(`response`, response);
   return (
     <div>
       <QuestionDetails

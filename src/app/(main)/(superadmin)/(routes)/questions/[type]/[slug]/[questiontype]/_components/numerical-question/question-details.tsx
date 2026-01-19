@@ -30,6 +30,7 @@ interface QuestionDetailsProps {
 
 const QuestionDetails = ({ data }: QuestionDetailsProps) => {
   const searchParams = useSearchParams();
+  const currentLang = searchParams.get("lang") || "de";
   const { refresh } = useRouter();
 
   const [updateNumericalQuestion, { loading: updateLoading }] =
@@ -85,6 +86,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
       methods.reset(defaultValues);
     }
   }, [data?._id]); // Only reset when the question ID changes, not on every data change
+
 
   const onSubmit = async (inputData: NumericalQuestionInput) => {
 
@@ -253,6 +255,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     placement="top"
                   >
                     <Controller
+                      key={`${questionDataIndex}-${currentLang}`}
                       control={methods.control}
                       name={`questionData.${questionDataIndex}.title`}
                       render={({ field }) => (
