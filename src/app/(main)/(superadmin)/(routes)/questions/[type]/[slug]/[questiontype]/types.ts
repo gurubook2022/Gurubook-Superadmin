@@ -78,7 +78,7 @@ export type BKFQuestion = {
     solution?: string,
     solution1?: string,
     imageUrl?: string,
-    questionData: Omit<QuestionData, "imageText" | "imageTextAudio" | "remarksAudio" | "remarks" | "subTitle" | "subTitleAudio">[],
+    questionData: Omit<QuestionData, "imageText" | "imageTextAudio" | "remarksAudio" | "subTitle" | "subTitleAudio">[],
 
     options: Option[],
     createdAt: Date,

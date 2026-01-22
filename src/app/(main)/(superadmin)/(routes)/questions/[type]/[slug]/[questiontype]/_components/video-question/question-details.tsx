@@ -28,6 +28,7 @@ interface QuestionDetailsProps {
 const QuestionDetails = ({ data }: QuestionDetailsProps) => {
   const { refresh } = useRouter();
   const searchParams = useSearchParams();
+  const currentLang = searchParams.get("lang") || "de";
   const [questionDataIndex, setQuestionDataIndex] = useState(
     getLanguageIndex(
       data?.questionData?.map((d: QuestionData) => d.language),
@@ -181,79 +182,81 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                   </div>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <Popover
-                    size="lg"
-                    content={() =>
-                      data?.questionData?.find(
-                        (data: QuestionData) => data?.language === "en"
-                      )?.title
-                    }
-                    placement="top"
-                  >
-                    <Input
-                      label="Title"
-                      placeholder="Title"
-                      {...methods.register(
-                        `questionData.${questionDataIndex}.title`
-                      )}
-                      value={methods.watch(
-                        `questionData.${questionDataIndex}.title`
-                      )}
-                      onMouseEnter={(e) => {
-                        if (e.isTrusted) {
-                          if (
-                            methods.watch(
-                              `questionData.${questionDataIndex}.titleAudio`
-                            )
-                          ) {
-                            const audio = new Audio();
-                            audio.src = methods.watch(
-                              `questionData.${questionDataIndex}.titleAudio`
-                            );
-                            audio.play();
-                          }
+
+                  <Controller
+                    key={`${questionDataIndex}-${currentLang}-title`}
+                    control={methods.control}
+                    name={`questionData.${questionDataIndex}.title`}
+                    render={({ field }) => (
+                      <Popover
+                        size="lg"
+                        content={() =>
+                          data?.questionData?.find(
+                            (data: QuestionData) => data?.language === "en"
+                          )?.title
                         }
-                      }}
-                      helperClassName="border-4"
-                    />
-                  </Popover>
-                  <Popover
-                    size="lg"
-                    content={() =>
-                      data?.questionData?.find(
-                        (data: QuestionData) => data?.language === "en"
-                      )?.subTitle
-                    }
-                    placement="top"
-                  >
-                    <Input
-                      label="Sub Title"
-                      placeholder="Sub Title"
-                      {...methods.register(
-                        `questionData.${questionDataIndex}.subTitle`
-                      )}
-                      value={methods.watch(
-                        `questionData.${questionDataIndex}.subTitle`
-                      )}
-                      onMouseEnter={(e) => {
-                        if (e.isTrusted) {
-                          if (
-                            methods.watch(
-                              `questionData.${questionDataIndex}.subTitleAudio`
-                            )
-                          ) {
-                            const audio = new Audio();
-                            audio.src = methods.watch(
-                              `questionData.${questionDataIndex}.subTitleAudio`
-                            );
-                            audio.play();
-                          }
+                        placement="top"
+                      >
+                        <Input
+                          label="Title"
+                          placeholder="Title"
+                          {...field}
+                          onMouseEnter={(e) => {
+                            if (e.isTrusted) {
+                              const audioUrl = methods.getValues(
+                                `questionData.${questionDataIndex}.titleAudio`
+                              );
+                              if (audioUrl) {
+                                const audio = new Audio();
+                                audio.src = audioUrl;
+                                audio.play();
+                              }
+                            }
+                          }}
+                          helperClassName="border-4"
+                        />
+                      </Popover>
+                    )}
+                  />
+
+                  <Controller
+                    key={`${questionDataIndex}-${currentLang}-subTitle`}
+                    control={methods.control}
+                    name={`questionData.${questionDataIndex}.subTitle`}
+                    render={({ field }) => (
+
+                      <Popover
+                        size="lg"
+                        content={() =>
+                          data?.questionData?.find(
+                            (data: QuestionData) => data?.language === "en"
+                          )?.subTitle
                         }
-                      }}
-                      className="w-56"
-                      helperClassName="border-4"
-                    />
-                  </Popover>
+                        placement="top"
+                      >
+                        <Input
+                          label="Sub Title"
+                          placeholder="Sub Title"
+                          {...field}
+                          value={field.value ?? ""}
+                          onMouseEnter={(e) => {
+                            if (e.isTrusted) {
+                              const audioUrl = methods.getValues(
+                                `questionData.${questionDataIndex}.subTitleAudio`
+                              );
+                              if (audioUrl) {
+                                const audio = new Audio();
+                                audio.src = audioUrl;
+                                audio.play();
+                              }
+                            }
+                          }}
+                          className="w-56"
+                          helperClassName="border-4"
+                        />
+                      </Popover>
+                    )}
+                  />
                 </div>
 
                 <div className="flex flex-col gap-4">
@@ -270,43 +273,42 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     )
                   )}
                 </div>
-                <Popover
-                  size="lg"
-                  content={() =>
-                    data?.questionData?.find(
-                      (data: QuestionData) => data?.language === "en"
-                    )?.remarks
-                  }
-                  placement="top"
-                >
-                  <Textarea
-                    label="Remarks"
-                    placeholder="Remarks"
-                    {...methods.register(
-                      `questionData.${questionDataIndex}.remarks`
-                    )}
-                    value={methods.watch(
-                      `questionData.${questionDataIndex}.remarks`
-                    )}
-                    onMouseEnter={(e) => {
-                      if (e.isTrusted) {
-                        if (
-                          methods.watch(
-                            `questionData.${questionDataIndex}.remarksAudio`
-                          )
-                        ) {
-                          const audio = new Audio();
-                          audio.src = methods.watch(
-                            `questionData.${questionDataIndex}.remarksAudio`
-                          );
-                          audio.play();
-                        }
+
+                <div className="flex flex-col gap-4 !mb-10">
+                  <Controller
+                    key={`${questionDataIndex}-${currentLang}-remarks`}
+                    control={methods.control}
+                    name={`questionData.${questionDataIndex}.remarks`}
+                    render={({ field }) => <><Popover
+                      size="lg"
+                      content={() => data?.questionData?.find(
+                        (data: any) => data?.language === "en"
+                      )?.remarks
                       }
-                    }}
-                    helperClassName="border-4"
-                    className="!mb-10"
+                      placement="top"
+                    >
+                      <Textarea
+                        label="Remarks"
+                        placeholder="Remarks"
+                        {...field}
+                        onMouseEnter={(e) => {
+                          if (e.isTrusted) {
+                            const audioUrl = methods.getValues(
+                              `questionData.${questionDataIndex}.remarksAudio`
+                            );
+                            if (audioUrl) {
+                              const audio = new Audio();
+                              audio.src = audioUrl;
+                              audio.play();
+                            }
+                          }
+                        }}
+                        helperClassName="border-4"
+                      />
+                    </Popover></>
+                    }
                   />
-                </Popover>
+                </div>
               </div>
             </div>
             <div className="flex px-10 py-4 fixed bottom-0 right-0 backdrop-blur-3xl	 left-0   items-center justify-end gap-6">

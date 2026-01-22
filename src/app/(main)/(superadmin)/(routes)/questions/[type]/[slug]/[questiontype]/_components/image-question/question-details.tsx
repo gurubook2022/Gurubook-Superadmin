@@ -248,20 +248,20 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                 </div>
 
                 <div className="flex flex-col gap-4">
-                  <Popover
-                    size="lg"
-                    content={() =>
-                      data?.questionData?.find(
-                        (data: QuestionData) => data?.language === "en"
-                      )?.title
-                    }
-                    placement="top"
-                  >
-                    <Controller
-                      key={`${questionDataIndex}-${currentLang}`}
-                      control={methods.control}
-                      name={`questionData.${questionDataIndex}.title`}
-                      render={({ field }) => (
+                  <Controller
+                    key={`${questionDataIndex}-${currentLang}-title`}
+                    control={methods.control}
+                    name={`questionData.${questionDataIndex}.title`}
+                    render={({ field }) => (
+                      <Popover
+                        size="lg"
+                        content={() =>
+                          data?.questionData?.find(
+                            (data: QuestionData) => data?.language === "en"
+                          )?.title
+                        }
+                        placement="top"
+                      >
                         <Input
                           label="Title"
                           placeholder="Title"
@@ -280,24 +280,25 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                           }}
                           helperClassName="border-4"
                         />
-                      )}
-                    />
-                  </Popover>
+                      </Popover>
+                    )}
+                  />
 
-                  <Popover
-                    size="lg"
-                    content={() =>
-                      data?.questionData?.find(
-                        (data: QuestionData) => data?.language === "en"
-                      )?.subTitle
-                    }
-                    placement="top"
-                  >
-                    <Controller
-                      key={`${questionDataIndex}-${currentLang}`}
-                      control={methods.control}
-                      name={`questionData.${questionDataIndex}.subTitle`}
-                      render={({ field }) => (
+                  <Controller
+                    key={`${questionDataIndex}-${currentLang}-subTitle`}
+                    control={methods.control}
+                    name={`questionData.${questionDataIndex}.subTitle`}
+                    render={({ field }) => (
+
+                      <Popover
+                        size="lg"
+                        content={() =>
+                          data?.questionData?.find(
+                            (data: QuestionData) => data?.language === "en"
+                          )?.subTitle
+                        }
+                        placement="top"
+                      >
                         <Input
                           label="Sub Title"
                           placeholder="Sub Title"
@@ -318,9 +319,9 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                           className="w-56"
                           helperClassName="border-4"
                         />
-                      )}
-                    />
-                  </Popover>
+                      </Popover>
+                    )}
+                  />
                 </div>
                 <div className="flex flex-col gap-4">
                   <ImageUpload />
@@ -354,7 +355,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     />
                   </div>
                 </div>
-                <div className="flex flex-col gap-4 !mb-6">
+                <div className="flex flex-col gap-4">
                   {data?.options?.map((optionData, optionDataIndex) => (
                     <Option
                       key={optionData._id}
@@ -362,6 +363,43 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                       option={optionData}
                     />
                   ))}
+                </div>
+
+                <div className="flex flex-col gap-4 !mb-10">
+                  <Controller
+                    key={`${questionDataIndex}-${currentLang}-remarks`}
+                    control={methods.control}
+                    name={`questionData.${questionDataIndex}.remarks`}
+                    render={({ field }) => <><Popover
+                      size="lg"
+                      content={() => data?.questionData?.find(
+                        (data: any) => data?.language === "en"
+                      )?.remarks
+                      }
+                      placement="top"
+                    >
+                      <Textarea
+                        label="Remarks"
+                        placeholder="Remarks"
+                        {...field}
+                        onMouseEnter={(e) => {
+                          if (e.isTrusted) {
+                            const audioUrl = methods.getValues(
+                              `questionData.${questionDataIndex}.remarksAudio`
+                            );
+                            if (audioUrl) {
+                              const audio = new Audio();
+                              audio.src = audioUrl;
+                              audio.play();
+                            }
+                          }
+                        }}
+                        helperClassName="border-4"
+                      />
+                    </Popover></>
+                    }
+                  />
+
                 </div>
               </div>
             </div>

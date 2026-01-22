@@ -20,9 +20,9 @@ import ImageUpload from "./image-upload";
 import { Popover } from "@/components/ui/popover";
 import { UPDATE_NUMERICAL_QUESTION } from "@/graphql/mutations";
 import { useMutation } from "@apollo/client";
-import { soloQuestionFormSchema } from "@/validators/solo-question";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 interface QuestionDetailsProps {
   data: DlQuestion;
@@ -245,20 +245,21 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                   </div>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <Popover
-                    size="lg"
-                    content={() =>
-                      data?.questionData?.find(
-                        (data: QuestionData) => data?.language === "en"
-                      )?.title
-                    }
-                    placement="top"
-                  >
-                    <Controller
-                      key={`${questionDataIndex}-${currentLang}`}
-                      control={methods.control}
-                      name={`questionData.${questionDataIndex}.title`}
-                      render={({ field }) => (
+
+                  <Controller
+                    key={`${questionDataIndex}-${currentLang}-title`}
+                    control={methods.control}
+                    name={`questionData.${questionDataIndex}.title`}
+                    render={({ field }) => (
+                      <Popover
+                        size="lg"
+                        content={() =>
+                          data?.questionData?.find(
+                            (data: QuestionData) => data?.language === "en"
+                          )?.title
+                        }
+                        placement="top"
+                      >
                         <Input
                           label="Title"
                           placeholder="Title"
@@ -277,9 +278,9 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                           }}
                           helperClassName="border-4"
                         />
-                      )}
-                    />
-                  </Popover>
+                      </Popover>
+                    )}
+                  />
                   <Popover
                     size="lg"
                     content={() =>
@@ -365,7 +366,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                 <UploadZone name="" setValue={() => {}} getValues={() => {}} />
               </div> */}
 
-                <div className="gap-4 md:flex-row flex-col flex items-center !mb-6">
+                <div className="gap-4 md:flex-row flex-col flex items-center">
                   <Popover
                     size="lg"
                     content={() =>
@@ -478,6 +479,43 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                       helperClassName="border-4"
                     />
                   </Popover>
+                </div>
+
+                <div className="flex flex-col gap-4 !mb-10">
+                  <Controller
+                    key={`${questionDataIndex}-${currentLang}-remarks`}
+                    control={methods.control}
+                    name={`questionData.${questionDataIndex}.remarks`}
+                    render={({ field }) => <><Popover
+                      size="lg"
+                      content={() => data?.questionData?.find(
+                        (data: any) => data?.language === "en"
+                      )?.remarks
+                      }
+                      placement="top"
+                    >
+                      <Textarea
+                        label="Remarks"
+                        placeholder="Remarks"
+                        {...field}
+                        onMouseEnter={(e) => {
+                          if (e.isTrusted) {
+                            const audioUrl = methods.getValues(
+                              `questionData.${questionDataIndex}.remarksAudio`
+                            );
+                            if (audioUrl) {
+                              const audio = new Audio();
+                              audio.src = audioUrl;
+                              audio.play();
+                            }
+                          }
+                        }}
+                        helperClassName="border-4"
+                      />
+                    </Popover></>
+                    }
+                  />
+
                 </div>
               </div>
             </div>
