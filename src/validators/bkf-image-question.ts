@@ -13,17 +13,18 @@ export const bkfImageQuestionFormSchema = z.object({
     })).optional(),
     classes: z.array(z.string()).nonempty({ message: "Atleast one class is required" }),
     chapters: z.array(z.string()).nonempty({ message: "Atleast one chapter is required" }),
+
     options: z.array(z.object({
         _id: z.string().optional(),
         isCorrect: z.boolean(),
         optionData: z.array(z.object({
             _id: z.string().optional(),
             language: z.string(),
-            content: z.string(),
-            audio: z.string(),
+            content: z.string().min(1, { message: "Content is required" }),
+            audio: z.string().optional(),
             highlightedWord: z.string().optional()
         })),
-    })).nonempty({ message: "Options are required" }),
+    })).min(1, { message: "Options are required" }),
     // imageUrl: z.string().min(1, { message: "Image is requried" })
     imageUrl: z.string().optional()
 });

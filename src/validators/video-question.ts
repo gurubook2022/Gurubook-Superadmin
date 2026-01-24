@@ -14,17 +14,18 @@ export const videoQuestionFormSchema = z.object({
     })).optional(),
     classes: z.array(z.string()).nonempty({ message: "Atleast one class is required" }),
     chapters: z.array(z.string()).nonempty({ message: "Atleast one chapter is required" }),
+
     options: z.array(z.object({
         _id: z.string().optional(),
         isCorrect: z.boolean(),
         optionData: z.array(z.object({
             _id: z.string().optional(),
             language: z.string(),
-            content: z.string(),
-            audio: z.string(),
+            content: z.string().min(1, { message: "Content is required" }),
+            audio: z.string().optional(),
             highlightedWord: z.string().optional()
         })),
-    })),
+    })).min(1, { message: "Options are required" }),
     videoUrl: z.string().min(1, { message: "Video is required" }),
     startImageUrl: z.string().min(1, { message: "Start Image is required" }),
     endImageUrl: z.string().min(1, { message: "End Image is required" })

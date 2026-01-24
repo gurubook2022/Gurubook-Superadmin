@@ -18,7 +18,7 @@ import ImageUpload from "./image-upload";
 import Select from "react-select";
 import { dlClasses } from "@/constants/classes";
 import DeleteButton from "./delete-button";
-import { DlQuestion, QuestionData } from "../../types";
+import { DlQuestion, QuestionData, Option as OptionT, } from "../../types";
 import { chapters } from "@/constants/chapters";
 import { Popover } from "@/components/ui/popover";
 import { UPDATE_IMAGE_QUESTION } from "@/graphql/mutations";
@@ -121,6 +121,40 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
       });
     }
   };
+
+
+  // Add these handler functions before the return statement, after onSubmit
+  const addOption = () => {
+    const currentOptions = methods.getValues('options') || [];
+
+    // Create new option with data for all languages
+    const languages = data?.questionData?.map(qd => qd.language) || ['de'];
+    const newOption: OptionT = {
+      isCorrect: false,
+      optionData: languages.map(lang => ({
+        language: lang,
+        content: '',
+        audio: '',
+        highlightedWord: ''
+      }))
+    };
+
+    methods.setValue('options', [...currentOptions, newOption]);
+  };
+
+  const removeOption = (index: number) => {
+    const currentOptions = methods.getValues('options') || [];
+    if (currentOptions.length <= 1) {
+      toast.error("At least one option is required", {
+        position: "bottom-left",
+      });
+      return;
+    }
+
+    const updatedOptions = currentOptions.filter((_, i) => i !== index);
+    methods.setValue('options', updatedOptions);
+  };
+
   return (
     <div className="space-y-8">
       <Suspense fallback={<>loading ...</>}>
@@ -355,16 +389,43 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     />
                   </div>
                 </div>
+
                 <div className="flex flex-col gap-4">
-                  {data?.options?.map((optionData, optionDataIndex) => (
+                  {methods.watch('options')?.map((optionData: OptionT, optionDataIndex) => (
                     <Option
                       key={optionData._id}
                       optionDataIndex={optionDataIndex}
                       option={optionData}
+                      onRemove={() => removeOption(optionDataIndex)}
                     />
                   ))}
+                  <div className="flex items-center justify-center">
+                    <Button
+                      type="button"
+                      onClick={addOption}
+                      variant="solid"
+                      color="primary"
+                      size="sm"
+                      className="flex items-center gap-1"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={16}
+                        height={16}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
+                      Add Option
+                    </Button>
+                  </div>
                 </div>
-
                 <div className="flex flex-col gap-4 !mb-10">
                   <Controller
                     key={`${questionDataIndex}-${currentLang}-remarks`}

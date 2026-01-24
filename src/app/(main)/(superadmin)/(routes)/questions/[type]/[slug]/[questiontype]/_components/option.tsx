@@ -10,9 +10,10 @@ import { Option as OptionT } from "../types";
 interface OptionProps {
   optionDataIndex: number;
   option: OptionT;
+  onRemove: () => void; // Add this
 }
 
-const Option = ({ optionDataIndex, option }: OptionProps) => {
+const Option = ({ optionDataIndex, option, onRemove }: OptionProps) => {
   const searchParams = useSearchParams();
   const currentLang = searchParams.get("lang") || "de";
 
@@ -48,7 +49,7 @@ const Option = ({ optionDataIndex, option }: OptionProps) => {
   const highlightedWord = watch(highlightedWordPath) || "";
 
   return (
-    <div className="relative">
+    <div className="relative group" >
       <Button
         onClick={toggleIsCorrect}
         className="absolute p-0 py-0 h-auto top-5 bg-white -left-1"
@@ -80,6 +81,19 @@ const Option = ({ optionDataIndex, option }: OptionProps) => {
             />
           </svg>
         )}
+      </Button>
+
+      {/* Add Delete Button - appears on hover */}
+      <Button
+        type="button"
+        onClick={onRemove} // Use the onRemove prop
+        className="absolute text-xs h-auto -top-2 -right-0  opacity-0 group-hover:opacity-100 transition-opacity"
+        title="Remove this option"
+        color="danger"
+        size="sm"
+
+      >
+        Remove
       </Button>
       <div className="flex flex-col gap-2">
         <Controller

@@ -19,15 +19,15 @@ export type QuestionT = DlQuestion | BKFQuestion;
 // }
 
 export type OptionData = {
-    _id: string,
+    _id?: string,
     language: string,
     content: string,
-    audio: string,
+    audio?: string,
     highlightedWord?: string
 }
 
 export type Option = {
-    _id: string,
+    _id?: string,
     isCorrect: boolean,
     optionData: OptionData[]
 }
