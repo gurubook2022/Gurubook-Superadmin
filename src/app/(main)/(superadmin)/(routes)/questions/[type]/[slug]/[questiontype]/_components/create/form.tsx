@@ -32,11 +32,11 @@ const Form = () => {
 
     try {
       console.log("Uploading file to S3...");
-      const url = await uploadFileToAWSS3Bucket(file, "csv");
-      console.log("File uploaded to S3. URL:", url);
+      // const url = await uploadFileToAWSS3Bucket(file, "csv");
+      // console.log("File uploaded to S3. URL:", url);
       await uploadQuestions({
         variables: {
-          url: url,
+          url: "url",
         },
         onCompleted: ({ uploadQuestions }) => {
           toast.success("Questions Uploaded Successfully");

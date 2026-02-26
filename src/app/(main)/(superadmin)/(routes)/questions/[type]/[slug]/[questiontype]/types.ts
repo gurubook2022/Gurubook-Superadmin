@@ -51,7 +51,7 @@ export type QuestionData = {
 }
 
 export type DlQuestion = {
-    questionType: "Numerical" | "Solo" | "Image" | "Video",
+    questionType: "Numerical" | "Numerical Image" | "Numerical Video" | "Solo" | "Image" | "Video",
     chapters: string[],
     questionNumber: string,
     points: number,
@@ -70,7 +70,7 @@ export type DlQuestion = {
 };
 
 export type BKFQuestion = {
-    questionType: "Bkf Solo" | "Bkf Image" | "Bkf Numerical",
+    questionType: "Bkf Solo" | "Bkf Image" | "Bkf Numerical" | "Bkf Numerical Image",
     chapters: string[],
     questionNumber: string,
     points: number,

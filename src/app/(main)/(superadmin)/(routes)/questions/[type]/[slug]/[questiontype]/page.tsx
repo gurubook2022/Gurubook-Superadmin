@@ -20,6 +20,8 @@ const page = ({
       {questiontype === "Solo" && <SoloQuestion slug={slug} />}
       {questiontype === "Image" && <ImageQuestion slug={slug} />}
       {questiontype === "Numerical" && <NumericalQuestion slug={slug} />}
+      {questiontype === "Numerical Image" && <NumericalQuestion slug={slug} />}
+      {questiontype === "Numerical Video" && <NumericalQuestion slug={slug} />}
       {questiontype === "Video" && <VideoQuestion slug={slug} />}
       {/* BKF Question Details Components */}
       {questiontype === "Bkf-Solo" && <BkfSoloQuestion slug={slug} />}

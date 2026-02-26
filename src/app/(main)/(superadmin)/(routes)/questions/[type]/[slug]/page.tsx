@@ -28,6 +28,8 @@ const page = ({
       {/* {type === "Solo" && <SoloQuestion slug={slug} />}
       {type === "Image" && <ImageQuestion slug={slug} />}
       {type === "Numerical" && <NumericalQuestion slug={slug} />}
+      {type === "Numerical Image" && <NumericalQuestion slug={slug} />}
+      {type === "Numerical Video" && <NumericalQuestion slug={slug} />}
       {type === "Video" && <VideoQuestion slug={slug} />} */}
     </div>
   );
