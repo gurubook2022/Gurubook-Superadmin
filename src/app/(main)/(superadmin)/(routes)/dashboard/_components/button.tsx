@@ -17,7 +17,6 @@ const Button = () => {
     const response = await axios(config);
     const statusUrl = response.data.statusUrl;
 
-    console.log(statusUrl);
   };
   return (
     <button
