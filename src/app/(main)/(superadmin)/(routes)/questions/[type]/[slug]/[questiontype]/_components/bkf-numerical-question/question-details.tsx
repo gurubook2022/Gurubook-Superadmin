@@ -144,6 +144,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                   <div className="w-full md:w-auto">
                     <Input
                       label="Question Number"
+                      disabled
                       placeholder="Question number"
                       {...methods.register(`questionNumber`)}
                       error={methods.formState.errors.questionNumber?.message}
