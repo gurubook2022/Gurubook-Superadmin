@@ -149,26 +149,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     });
                   }
                 }
-                if (errors.options) {
-                  const optionErrors = errors.options;
-                  const formOptions = methods.getValues("options") || [];
-                  if (Array.isArray(optionErrors)) {
-                    optionErrors.forEach((optErr, i) => {
-                      if (optErr?.optionData) {
-                        const optionDataErrors = optErr.optionData as any[];
-                        if (Array.isArray(optionDataErrors)) {
-                          optionDataErrors.forEach((odErr, j) => {
-                            if (odErr?.content) {
-                              const langCode = formOptions[i]?.optionData?.[j]?.language;
-                              const langName = langCode ? getLanguageName(langCode) || langCode : "unknown";
-                              messages.push(`Answer Option ${i + 1} (${langName}): Content is required`);
-                            }
-                          });
-                        }
-                      }
-                    });
-                  }
-                }
+                if ((errors as any).solution) messages.push("Solution is required");
                 toast.error(messages.join("\n") || "Please fix the validation errors", {
                   position: "bottom-left",
                   duration: 5000,
