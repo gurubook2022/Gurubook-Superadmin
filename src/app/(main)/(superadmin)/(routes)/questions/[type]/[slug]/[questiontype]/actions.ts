@@ -166,3 +166,25 @@ export const getBkfNumericalQuestionDetails = async (_id: string) => {
         return null
     }
 }
+
+
+
+export const getBkfNumericalImageQuestionDetails = async (_id: string) => {
+    const session = await getServerAuthSession()
+    try {
+        const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}`, {
+            query: GET_BKF_NUMERICAL_QUESTION,
+            variables: { _id }
+        }, {
+            headers: {
+                authorization: `${session?.user?.accessToken}`,
+            }
+        });
+
+        return data
+    } catch (error) {
+
+        serverErrorHandler(error)
+        return null
+    }
+}

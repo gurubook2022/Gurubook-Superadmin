@@ -22,6 +22,7 @@ import { useMutation } from "@apollo/client";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import VideoUpload from "../video-question/video-upload";
 
 interface QuestionDetailsProps {
   data: DlQuestion;
@@ -35,8 +36,6 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
   const [updateNumericalQuestion, { loading: updateLoading }] =
     useMutation(UPDATE_NUMERICAL_QUESTION);
 
-
-  // Transform data to ensure all fields exist with proper defaults
   const defaultValues = useMemo(() => ({
     points: data?.points ?? 0,
     questionNumber: data?.questionNumber ?? "",
@@ -62,10 +61,10 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
     chapters: data?.chapters ?? [],
     solution: data?.solution ?? "",
     solution1: data?.solution1 ?? "",
-    imageUrl: data?.imageUrl ?? "",
+    videoUrl: data?.videoUrl ?? "",
+    startImageUrl: data?.startImageUrl ?? "",
+    endImageUrl: data?.endImageUrl ?? "",
   }), [data]);
-
-
 
   const questionDataIndex = useMemo(() =>
     getLanguageIndex(
@@ -79,16 +78,13 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
     defaultValues
   });
 
-  // Reset form when data changes (e.g., after save or when navigating to different question)
   useEffect(() => {
     if (data?._id) {
       methods.reset(defaultValues);
     }
-  }, [data?._id]); // Only reset when the question ID changes, not on every data change
-
+  }, [data?._id]);
 
   const onSubmit = async (inputData: NumericalQuestionInput) => {
-
     try {
       const result = await updateNumericalQuestion({
         variables: {
@@ -125,6 +121,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
       </Suspense>
       <div>
         <FormProvider {...methods}>
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -145,26 +142,6 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                         const langCode = formQd[i]?.language;
                         const langName = langCode ? getLanguageName(langCode) || langCode : "unknown";
                         messages.push(`Title (${langName}): ${qdErr.title.message || "is required"}`);
-                      }
-                    });
-                  }
-                }
-                if (errors.options) {
-                  const optionErrors = errors.options;
-                  const formOptions = methods.getValues("options") || [];
-                  if (Array.isArray(optionErrors)) {
-                    optionErrors.forEach((optErr, i) => {
-                      if (optErr?.optionData) {
-                        const optionDataErrors = optErr.optionData as any[];
-                        if (Array.isArray(optionDataErrors)) {
-                          optionDataErrors.forEach((odErr, j) => {
-                            if (odErr?.content) {
-                              const langCode = formOptions[i]?.optionData?.[j]?.language;
-                              const langName = langCode ? getLanguageName(langCode) || langCode : "unknown";
-                              messages.push(`Answer Option ${i + 1} (${langName}): Content is required`);
-                            }
-                          });
-                        }
                       }
                     });
                   }
@@ -201,11 +178,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     />
                   </div>
                   <div className="mx-auto w-full">
-                    <label
-                      className={cn(
-                        "mb-1.5 block font-medium text-gray-700 dark:text-gray-600"
-                      )}
-                    >
+                    <label className={cn("mb-1.5 block font-medium text-gray-700 dark:text-gray-600")}>
                       Classes
                     </label>
                     <Controller
@@ -214,19 +187,11 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                       render={({ field: { onChange, value } }) => (
                         <>
                           <Select
-                            className="outline-gray-700 accent-current focus:outline-none focus:border-0  w-full"
+                            className="outline-gray-700 accent-current focus:outline-none focus:border-0 w-full"
                             isMulti={true}
-                            value={value?.map((item) => ({
-                              value: item,
-                              label: item,
-                            }))}
-                            options={dlClasses?.map((item) => ({
-                              value: item,
-                              label: item,
-                            }))}
-                            onChange={(selectItem) => {
-                              onChange(selectItem?.map((item) => item.value));
-                            }}
+                            value={value?.map((item) => ({ value: item, label: item }))}
+                            options={dlClasses?.map((item) => ({ value: item, label: item }))}
+                            onChange={(selectItem) => onChange(selectItem?.map((item) => item.value))}
                           />
                           {methods?.formState?.errors?.classes?.message && (
                             <p className="text-red text-xs mt-0.5 rizzui-input-error-text">
@@ -239,12 +204,8 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                   </div>
                 </div>
                 <div className="flex flex-col md:flex-row items-center gap-4 justify-between">
-                  <div className="mx-auto w-full ">
-                    <label
-                      className={cn(
-                        "mb-1.5 block font-medium text-gray-700 dark:text-gray-600"
-                      )}
-                    >
+                  <div className="mx-auto w-full">
+                    <label className={cn("mb-1.5 block font-medium text-gray-700 dark:text-gray-600")}>
                       Chapters
                     </label>
                     <Controller
@@ -253,23 +214,15 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                       render={({ field: { onChange, value } }) => (
                         <>
                           <Select
-                            className="outline-gray-700 accent-current focus:outline-none focus:border-0  w-full"
+                            className="outline-gray-700 accent-current focus:outline-none focus:border-0 w-full"
                             isMulti={true}
-                            value={value?.map((item) => ({
-                              value: item,
-                              label: item,
-                            }))}
-                            options={chapters?.map((item) => ({
-                              value: item,
-                              label: item,
-                            }))}
-                            onChange={(selectItem) => {
-                              onChange(selectItem?.map((item) => item.value));
-                            }}
+                            value={value?.map((item) => ({ value: item, label: item }))}
+                            options={chapters?.map((item) => ({ value: item, label: item }))}
+                            onChange={(selectItem) => onChange(selectItem?.map((item) => item.value))}
                           />
-                          {methods?.formState?.errors?.classes?.message && (
+                          {methods?.formState?.errors?.chapters?.message && (
                             <p className="text-red text-xs mt-0.5 rizzui-input-error-text">
-                              {methods?.formState?.errors?.classes?.message}
+                              {methods?.formState?.errors?.chapters?.message}
                             </p>
                           )}
                         </>
@@ -288,7 +241,6 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                   </div>
                 </div>
                 <div className="flex flex-col gap-4">
-
                   <Controller
                     key={`${questionDataIndex}-${currentLang}-title`}
                     control={methods.control}
@@ -296,184 +248,60 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     render={({ field }) => (
                       <Popover
                         size="lg"
-                        content={() =>
-                          data?.questionData?.find(
-                            (data: QuestionData) => data?.language === "en"
-                          )?.title
-                        }
+                        content={() => data?.questionData?.find((d: QuestionData) => d?.language === "en")?.title}
                         placement="top"
                       >
-                        <Input
-                          label="Title"
-                          placeholder="Title"
-                          {...field}
-                          onMouseEnter={(e) => {
-                            if (e.isTrusted) {
-                              const audioUrl = methods.getValues(
-                                `questionData.${questionDataIndex}.titleAudio`
-                              );
-                              if (audioUrl) {
-                                const audio = new Audio();
-                                audio.src = audioUrl;
-                                audio.play();
-                              }
-                            }
-                          }}
-                          helperClassName="border-4"
-                        />
+                        <Input label="Title" placeholder="Title" {...field} helperClassName="border-4" />
                       </Popover>
                     )}
                   />
                   <Popover
                     size="lg"
-                    content={() =>
-                      data?.questionData?.find(
-                        (data) => data?.language === "en"
-                      )?.subTitle
-                    }
+                    content={() => data?.questionData?.find((d) => d?.language === "en")?.subTitle}
                     placement="top"
                   >
                     <Input
                       label="Sub Title"
                       placeholder="Sub Title"
-                      {...methods.register(
-                        `questionData.${questionDataIndex}.subTitle`
-                      )}
-                      value={methods.watch(
-                        `questionData.${questionDataIndex}.subTitle`
-                      )}
-                      onMouseEnter={(e) => {
-                        if (e.isTrusted) {
-                          if (
-                            methods.watch(
-                              `questionData.${questionDataIndex}.subTitleAudio`
-                            )
-                          ) {
-                            const audio = new Audio();
-                            audio.src = methods.watch(
-                              `questionData.${questionDataIndex}.subTitleAudio`
-                            )!;
-                            audio.play();
-                          }
-                        }
-                      }}
+                      {...methods.register(`questionData.${questionDataIndex}.subTitle`)}
+                      value={methods.watch(`questionData.${questionDataIndex}.subTitle`)}
                       className="w-56"
                       helperClassName="border-4"
                     />
                   </Popover>
                 </div>
 
-
+                <div className="flex flex-col gap-4">
+                  <VideoUpload />
+                </div>
 
                 <div className="gap-4 md:flex-row flex-col flex items-center">
-                  <Popover
-                    size="lg"
-                    content={() =>
-                      data?.questionData?.find(
-                        (data) => data?.language === "en"
-                      )?.textInputQuestionOne
-                    }
-                    placement="top"
-                  >
+                  <Popover size="lg" content={() => data?.questionData?.find((d) => d?.language === "en")?.textInputQuestionOne} placement="top">
                     <Input
                       label="Text Input Question One"
                       placeholder="Text Input Question One"
-                      {...methods.register(
-                        `questionData.${questionDataIndex}.textInputQuestionOne`
-                      )}
-                      value={methods.watch(
-                        `questionData.${questionDataIndex}.textInputQuestionOne`
-                      )}
-                      onMouseEnter={(e) => {
-                        if (e.isTrusted) {
-                          if (
-                            methods.watch(
-                              `questionData.${questionDataIndex}.textInputQuestionOneAudio`
-                            )
-                          ) {
-                            const audio = new Audio();
-                            audio.src = methods.watch(
-                              `questionData.${questionDataIndex}.textInputQuestionOneAudio`
-                            );
-                            audio.play();
-                          }
-                        }
-                      }}
+                      {...methods.register(`questionData.${questionDataIndex}.textInputQuestionOne`)}
+                      value={methods.watch(`questionData.${questionDataIndex}.textInputQuestionOne`)}
                       className="w-full"
                       helperClassName="border-4"
                     />
                   </Popover>
-                  <Popover
-                    size="lg"
-                    content={() =>
-                      data?.questionData?.find(
-                        (data) => data?.language === "en"
-                      )?.textInputQuestionTwo
-                    }
-                    placement="top"
-                  >
+                  <Popover size="lg" content={() => data?.questionData?.find((d) => d?.language === "en")?.textInputQuestionTwo} placement="top">
                     <Input
                       label="Text Input Question Two"
                       placeholder="Text Input Question Two"
-                      {...methods.register(
-                        `questionData.${questionDataIndex}.textInputQuestionTwo`
-                      )}
-                      value={methods.watch(
-                        `questionData.${questionDataIndex}.textInputQuestionTwo`
-                      )}
-                      onMouseEnter={(e) => {
-                        if (e.isTrusted) {
-                          if (
-                            methods.watch(
-                              `questionData.${questionDataIndex}.textInputQuestionTwoAudio`
-                            )
-                          ) {
-                            const audio = new Audio();
-                            audio.src = methods.watch(
-                              `questionData.${questionDataIndex}.textInputQuestionTwoAudio`
-                            );
-                            audio.play();
-                          }
-                        }
-                      }}
+                      {...methods.register(`questionData.${questionDataIndex}.textInputQuestionTwo`)}
+                      value={methods.watch(`questionData.${questionDataIndex}.textInputQuestionTwo`)}
                       className="w-full"
                       helperClassName="border-4"
                     />
                   </Popover>
-
-                  <Popover
-                    size="lg"
-                    content={() =>
-                      data?.questionData?.find(
-                        (data) => data?.language === "en"
-                      )?.textInputQuestionThree
-                    }
-                    placement="top"
-                  >
+                  <Popover size="lg" content={() => data?.questionData?.find((d) => d?.language === "en")?.textInputQuestionThree} placement="top">
                     <Input
                       label="Text Input Question Three"
                       placeholder="Text Input Question Three"
-                      {...methods.register(
-                        `questionData.${questionDataIndex}.textInputQuestionThree`
-                      )}
-                      value={methods.watch(
-                        `questionData.${questionDataIndex}.textInputQuestionThree`
-                      )}
-                      onMouseEnter={(e) => {
-                        if (e.isTrusted) {
-                          if (
-                            methods.watch(
-                              `questionData.${questionDataIndex}.textInputQuestionThreeAudio`
-                            )
-                          ) {
-                            const audio = new Audio();
-                            audio.src = methods.watch(
-                              `questionData.${questionDataIndex}.textInputQuestionThreeAudio`
-                            );
-                            audio.play();
-                          }
-                        }
-                      }}
+                      {...methods.register(`questionData.${questionDataIndex}.textInputQuestionThree`)}
+                      value={methods.watch(`questionData.${questionDataIndex}.textInputQuestionThree`)}
                       className="w-full"
                       helperClassName="border-4"
                     />
@@ -485,40 +313,20 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     key={`${questionDataIndex}-${currentLang}-remarks`}
                     control={methods.control}
                     name={`questionData.${questionDataIndex}.remarks`}
-                    render={({ field }) => <><Popover
-                      size="lg"
-                      content={() => data?.questionData?.find(
-                        (data: any) => data?.language === "en"
-                      )?.remarks
-                      }
-                      placement="top"
-                    >
-                      <Textarea
-                        label="Remarks"
-                        placeholder="Remarks"
-                        {...field}
-                        onMouseEnter={(e) => {
-                          if (e.isTrusted) {
-                            const audioUrl = methods.getValues(
-                              `questionData.${questionDataIndex}.remarksAudio`
-                            );
-                            if (audioUrl) {
-                              const audio = new Audio();
-                              audio.src = audioUrl;
-                              audio.play();
-                            }
-                          }
-                        }}
-                        helperClassName="border-4"
-                      />
-                    </Popover></>
-                    }
+                    render={({ field }) => (
+                      <Popover
+                        size="lg"
+                        content={() => data?.questionData?.find((d: any) => d?.language === "en")?.remarks}
+                        placement="top"
+                      >
+                        <Textarea label="Remarks" placeholder="Remarks" {...field} helperClassName="border-4" />
+                      </Popover>
+                    )}
                   />
-
                 </div>
               </div>
             </div>
-            <div className="flex px-10 py-4 fixed bottom-0 right-0 backdrop-blur-3xl	 left-0   items-center justify-end gap-6">
+            <div className="flex px-10 py-4 fixed bottom-0 right-0 backdrop-blur-3xl left-0 items-center justify-end gap-6">
               <DeleteButton _id={data?._id} />
               <Button
                 isLoading={updateLoading}

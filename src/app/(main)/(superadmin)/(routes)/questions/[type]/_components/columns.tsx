@@ -87,7 +87,7 @@ const ViewQuestionLink = ({ row }: { row: Row<QuestionT> }) => {
       <Link
         href={`/questions/${params?.type}/${row?.original?._id}/${(
           row.getValue("questionType") as string
-        )?.replace(" ", "-")}?lang=en`}
+        )?.replaceAll(" ", "-")}?lang=en`}
       >
         <ActionIcon
           tag="span"

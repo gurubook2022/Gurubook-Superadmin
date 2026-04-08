@@ -157,6 +157,48 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
               e.preventDefault();
               methods.handleSubmit(onSubmit, (errors) => {
                 console.log("Validation errors:", errors);
+                const messages: string[] = [];
+                if (errors.questionNumber) messages.push("Question number is required");
+                if (errors.points) messages.push("Points must be valid");
+                if (errors.classes) messages.push("At least one class is required");
+                if (errors.chapters) messages.push("At least one chapter is required");
+                if (errors.questionData) {
+                  const qdErrors = errors.questionData;
+                  if (Array.isArray(qdErrors)) {
+                    const formQd = methods.getValues("questionData") || [];
+                    qdErrors.forEach((qdErr, i) => {
+                      if (qdErr?.title) {
+                        const langCode = formQd[i]?.language;
+                        const langName = langCode ? getLanguageName(langCode) || langCode : "unknown";
+                        messages.push(`Title (${langName}): ${qdErr.title.message || "is required"}`);
+                      }
+                    });
+                  }
+                }
+                if (errors.options) {
+                  const optionErrors = errors.options;
+                  const formOptions = methods.getValues("options") || [];
+                  if (Array.isArray(optionErrors)) {
+                    optionErrors.forEach((optErr, i) => {
+                      if (optErr?.optionData) {
+                        const optionDataErrors = optErr.optionData as any[];
+                        if (Array.isArray(optionDataErrors)) {
+                          optionDataErrors.forEach((odErr, j) => {
+                            if (odErr?.content) {
+                              const langCode = formOptions[i]?.optionData?.[j]?.language;
+                              const langName = langCode ? getLanguageName(langCode) || langCode : "unknown";
+                              messages.push(`Answer Option ${i + 1} (${langName}): Content is required`);
+                            }
+                          });
+                        }
+                      }
+                    });
+                  }
+                }
+                toast.error(messages.join("\n") || "Please fix the validation errors", {
+                  position: "bottom-left",
+                  duration: 5000,
+                });
               })(e);
             }}
             className={cn("[&_label.block>span]:font-medium space-y-6")}

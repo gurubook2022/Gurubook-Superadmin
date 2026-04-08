@@ -70,7 +70,8 @@ export function handleGraphqlErrors(error: ApolloError) {
 export const toFixed = (num: number) => parseFloat(num.toFixed(2).replace(/0+$/, ""))
 
 export const getLanguageIndex = (LANGUAGES: string[], selectedLanguageCode: string) => {
-  return LANGUAGES?.findIndex(lang => lang === selectedLanguageCode)
+  const index = LANGUAGES?.findIndex(lang => lang === selectedLanguageCode)
+  return index === -1 ? 0 : index
 }
 
 export const getLanguageName = (selectedLanguageCode: string) => {

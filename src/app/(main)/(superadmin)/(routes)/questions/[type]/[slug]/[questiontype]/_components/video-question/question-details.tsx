@@ -21,6 +21,8 @@ import { chapters } from "@/constants/chapters";
 import { Popover } from "@/components/ui/popover";
 import Option from "../option";
 import { Button } from "@/components/ui/button";
+import { UPDATE_VIDEO_QUESTION } from "@/graphql/mutations";
+import { useMutation } from "@apollo/client";
 import toast from "react-hot-toast";
 
 interface QuestionDetailsProps {
@@ -47,6 +49,9 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
     );
   }, [data?.questionData, searchParams]);
 
+  const [updateVideoQuestion, { loading: updateLoading }] =
+    useMutation(UPDATE_VIDEO_QUESTION);
+
   const methods = useForm<VideoQuestionInput>({
     resolver: zodResolver(videoQuestionFormSchema),
     defaultValues: {
@@ -61,7 +66,36 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
       chapters: data?.chapters,
     },
   });
-  const onSubmit = (inputData: VideoQuestionInput) => { };
+
+  const onSubmit = async (inputData: VideoQuestionInput) => {
+    try {
+      const result = await updateVideoQuestion({
+        variables: {
+          _id: data?._id,
+          points: inputData?.points,
+          questionNumber: inputData?.questionNumber,
+          classes: inputData?.classes,
+          options: inputData?.options,
+          questionData: inputData?.questionData,
+          chapters: inputData?.chapters,
+          videoUrl: inputData?.videoUrl,
+          startImageUrl: inputData?.startImageUrl,
+          endImageUrl: inputData?.endImageUrl,
+        },
+      });
+
+      if (result.data?.updateVideoQuestion === data?._id) {
+        toast.success("Question Updated Successfully", {
+          position: "bottom-left",
+        });
+        refresh();
+      }
+    } catch (error) {
+      toast.error("Failed to update question", {
+        position: "bottom-left",
+      });
+    }
+  };
   // Add these handler functions before the return statement, after onSubmit
   const addOption = () => {
     const currentOptions = methods.getValues('options') || [];
@@ -102,7 +136,57 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
       <div>
         <FormProvider {...methods}>
           <form
-            onSubmit={methods.handleSubmit(onSubmit)}
+            onSubmit={(e) => {
+              e.preventDefault();
+              methods.handleSubmit(onSubmit, (errors) => {
+                console.log("Validation errors:", errors);
+                const messages: string[] = [];
+                if (errors.questionNumber) messages.push("Question number is required");
+                if (errors.points) messages.push("Points must be valid");
+                if (errors.classes) messages.push("At least one class is required");
+                if (errors.chapters) messages.push("At least one chapter is required");
+                if (errors.videoUrl) messages.push("Video is required");
+                if (errors.startImageUrl) messages.push("Start image is required");
+                if (errors.endImageUrl) messages.push("End image is required");
+                if (errors.questionData) {
+                  const qdErrors = errors.questionData;
+                  if (Array.isArray(qdErrors)) {
+                    const formQd = methods.getValues("questionData") || [];
+                    qdErrors.forEach((qdErr, i) => {
+                      if (qdErr?.title) {
+                        const langCode = formQd[i]?.language;
+                        const langName = langCode ? getLanguageName(langCode) || langCode : "unknown";
+                        messages.push(`Title (${langName}): ${qdErr.title.message || "is required"}`);
+                      }
+                    });
+                  }
+                }
+                if (errors.options) {
+                  const optionErrors = errors.options;
+                  const formOptions = methods.getValues("options") || [];
+                  if (Array.isArray(optionErrors)) {
+                    optionErrors.forEach((optErr, i) => {
+                      if (optErr?.optionData) {
+                        const optionDataErrors = optErr.optionData as any[];
+                        if (Array.isArray(optionDataErrors)) {
+                          optionDataErrors.forEach((odErr, j) => {
+                            if (odErr?.content) {
+                              const langCode = formOptions[i]?.optionData?.[j]?.language;
+                              const langName = langCode ? getLanguageName(langCode) || langCode : "unknown";
+                              messages.push(`Answer Option ${i + 1} (${langName}): Content is required`);
+                            }
+                          });
+                        }
+                      }
+                    });
+                  }
+                }
+                toast.error(messages.join("\n") || "Please fix the validation errors", {
+                  position: "bottom-left",
+                  duration: 5000,
+                });
+              })(e);
+            }}
             className={cn("[&_label.block>span]:font-medium space-y-6")}
           >
             <div className="grid md:grid-cols-4 pb-6 border-b border-dashed border-gray-200 gap-10">
@@ -373,6 +457,15 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
             </div>
             <div className="flex px-10 py-4 fixed bottom-0 right-0 backdrop-blur-3xl	 left-0   items-center justify-end gap-6">
               <DeleteButton _id={data?._id} />
+              <Button
+                isLoading={updateLoading}
+                disabled={updateLoading}
+                variant="solid"
+                color="primary"
+                type="submit"
+              >
+                Update
+              </Button>
             </div>
           </form>
         </FormProvider>

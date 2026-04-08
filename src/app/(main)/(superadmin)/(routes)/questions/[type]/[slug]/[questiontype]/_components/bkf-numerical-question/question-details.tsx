@@ -106,9 +106,13 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
           toast.success("Question Updated Successfully", {
             position: "bottom-left",
           });
-          // toast.dismiss(toastId);
           refresh();
         }
+      },
+      onError: () => {
+        toast.error("Failed to update question", {
+          position: "bottom-left",
+        });
       },
     });
   };
@@ -124,6 +128,29 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
               e.preventDefault();
               methods.handleSubmit(onSubmit, (errors) => {
                 console.log("Validation errors:", errors);
+                const messages: string[] = [];
+                if (errors.questionNumber) messages.push("Question number is required");
+                if (errors.points) messages.push("Points must be valid");
+                if (errors.classes) messages.push("At least one class is required");
+                if (errors.chapters) messages.push("At least one chapter is required");
+                if (errors.questionData) {
+                  const qdErrors = errors.questionData;
+                  if (Array.isArray(qdErrors)) {
+                    const formQd = methods.getValues("questionData") || [];
+                    qdErrors.forEach((qdErr, i) => {
+                      if (qdErr?.title) {
+                        const langCode = formQd[i]?.language;
+                        const langName = langCode ? getLanguageName(langCode) || langCode : "unknown";
+                        messages.push(`Title (${langName}): ${qdErr.title.message || "is required"}`);
+                      }
+                    });
+                  }
+                }
+                if ((errors as any).solution) messages.push("Solution is required");
+                toast.error(messages.join("\n") || "Please fix the validation errors", {
+                  position: "bottom-left",
+                  duration: 5000,
+                });
               })(e);
             }}
             className={cn("[&_label.block>span]:font-medium space-y-6")}
@@ -277,9 +304,6 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                   </Popover>
                 </div>
 
-                <div className="flex flex-col gap-4">
-                  <ImageUpload />
-                </div>
                 <div className="flex gap-4 items-center !mb-10">
                   <Popover
                     size="lg"

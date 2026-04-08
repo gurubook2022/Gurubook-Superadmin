@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ActionIcon } from "@/components/ui/action-icon";
-import { DELETE_BKF_NUMERICAL_QUESTION } from "@/graphql/mutations";
+import { DELETE_NUMERICAL_QUESTION } from "@/graphql/mutations";
 import { Title, Text } from "@/components/ui/text";
 import { useMutation } from "@apollo/client";
 import { TrashIcon, XIcon } from "lucide-react";
@@ -17,9 +17,8 @@ interface DeleteButtonProps {
 const DeleteButton = ({ _id }: DeleteButtonProps) => {
   const { refresh, push } = useRouter();
   const [modalState, setModalState] = useState(false);
-  // Delete Mutation
-  const [deleteBkfNumericalQuestion, { loading: deleteLoading }] = useMutation(
-    DELETE_BKF_NUMERICAL_QUESTION
+  const [deleteQuestion, { loading: deleteLoading }] = useMutation(
+    DELETE_NUMERICAL_QUESTION
   );
 
   const handleDelete = async () => {
@@ -27,14 +26,12 @@ const DeleteButton = ({ _id }: DeleteButtonProps) => {
       position: "bottom-left",
     });
     try {
-      await deleteBkfNumericalQuestion({
+      await deleteQuestion({
         variables: { _id },
-
         onCompleted: () => {
           toast.success("Question Deleted Successfully", {
             position: "bottom-left",
           });
-
           push("/questions");
           refresh();
         },

@@ -46,7 +46,7 @@ const DeleteButton = ({ _id }: DeleteButtonProps) => {
   };
   return (
     <>
-      <Button onClick={() => setModalState(true)} color="danger">
+      <Button type="button" onClick={() => setModalState(true)} color="danger">
         <TrashIcon className="w-4 h-4 mr-2" />
         Delete
       </Button>
@@ -75,7 +75,7 @@ const DeleteButton = ({ _id }: DeleteButtonProps) => {
             </div>
             <div className="flex items-center gap-4">
               <Button
-                type="submit"
+                type="button"
                 size="lg"
                 variant="outline"
                 className="w-full"
@@ -85,7 +85,7 @@ const DeleteButton = ({ _id }: DeleteButtonProps) => {
                 No, Keep it.
               </Button>
               <Button
-                type="submit"
+                type="button"
                 size="lg"
                 color="danger"
                 className="w-full"

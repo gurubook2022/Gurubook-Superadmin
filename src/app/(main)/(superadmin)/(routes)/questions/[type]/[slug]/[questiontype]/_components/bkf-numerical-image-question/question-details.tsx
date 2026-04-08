@@ -1,24 +1,23 @@
 "use client";
 import { cn, getLanguageIndex, getLanguageName } from "@/lib/utils";
+import { BKFQuestion } from "../../types";
 import { Text, Title } from "@/components/ui/text";
 import { Input } from "@/components/ui/input";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  BkfImageQuestionInput,
-  bkfImageQuestionFormSchema,
-} from "@/validators/bkf-image-question";
-import { Suspense, useEffect, useMemo, useState } from "react";
-import LanguagesSlider from "../languages-slider";
-import Option from "../option";
-import { useRouter, useSearchParams } from "next/navigation";
-import ImageUpload from "./image-upload";
 import Select from "react-select";
+import LanguagesSlider from "../languages-slider";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  BkfNumericalQuestionInput,
+  bkfNumericalQuestionFormSchema,
+} from "@/validators/bkf-numerical-question";
 import { bkfClasses } from "@/constants/classes";
 import DeleteButton from "./delete-button";
-import { BKFQuestion, Option as OptionT, } from "../../types";
-import { bkfChapters } from "@/constants/chapters";
+import ImageUpload from "./image-upload";
 import { Popover } from "@/components/ui/popover";
+import { bkfChapters } from "@/constants/chapters";
 import { UPDATE_BKF_QUESTION } from "@/graphql/mutations";
 import { useMutation } from "@apollo/client";
 import toast from "react-hot-toast";
@@ -31,7 +30,6 @@ interface QuestionDetailsProps {
 const QuestionDetails = ({ data }: QuestionDetailsProps) => {
   const searchParams = useSearchParams();
   const currentLang = searchParams.get("lang") || "de";
-
 
   const [questionDataIndex, setQuestionDataIndex] = useState(
     getLanguageIndex(
@@ -49,11 +47,6 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
     );
   }, [data?.questionData, currentLang]);
 
-  const [updateBkfQuestion, { loading: updateLoading }] =
-    useMutation(UPDATE_BKF_QUESTION);
-
-
-  // Transform data to ensure all fields exist with proper defaults
   const defaultValues = useMemo(() => ({
     points: data?.points ?? 0,
     questionNumber: data?.questionNumber ?? "",
@@ -66,51 +59,50 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
       subTitleAudio: qd?.subTitleAudio ?? "",
       remarks: qd?.remarks ?? "",
       remarksAudio: qd?.remarksAudio ?? "",
+      imageText: qd?.imageText ?? "",
+      imageTextAudio: qd?.imageTextAudio ?? "",
+      textInputQuestionOne: qd?.textInputQuestionOne ?? "",
+      textInputQuestionOneAudio: qd?.textInputQuestionOneAudio ?? "",
+      textInputQuestionTwo: qd?.textInputQuestionTwo ?? "",
+      textInputQuestionTwoAudio: qd?.textInputQuestionTwoAudio ?? "",
+      textInputQuestionThree: qd?.textInputQuestionThree ?? "",
+      textInputQuestionThreeAudio: qd?.textInputQuestionThreeAudio ?? "",
     })) ?? [],
     classes: data?.classes ?? [],
     chapters: data?.chapters ?? [],
-    options: data?.options?.map((opt: any) => ({
-      _id: opt?._id ?? "",
-      isCorrect: opt?.isCorrect ?? false,
-      optionData: opt?.optionData?.map((od: any) => ({
-        _id: od?._id ?? "",
-        language: od?.language ?? "",
-        content: od?.content ?? "",
-        audio: od?.audio ?? "",
-        highlightedWord: od?.highlightedWord ?? "",
-      })) ?? [],
-    })) ?? [],
+    solution: data?.solution ?? "",
+    solution1: data?.solution1 ?? "",
     imageUrl: data?.imageUrl ?? "",
   }), [data]);
 
-  const methods = useForm<BkfImageQuestionInput>({
-    resolver: zodResolver(bkfImageQuestionFormSchema),
+
+
+  const methods = useForm<BkfNumericalQuestionInput>({
+    resolver: zodResolver(bkfNumericalQuestionFormSchema),
     defaultValues
   });
+
+
+  const [updateBkfQuestion, { loading: updateLoading }] =
+    useMutation(UPDATE_BKF_QUESTION);
+
   const { refresh } = useRouter()
 
-
-  // Reset form when data changes (e.g., after save or when navigating to different question)
-  useEffect(() => {
-    if (data?._id) {
-      methods.reset(defaultValues);
-    }
-  }, [data?._id]); // Only reset when the question ID changes, not on every data change
-
-  const onSubmit = async (inputData: BkfImageQuestionInput) => {
+  const onSubmit = async (inputData: BkfNumericalQuestionInput) => {
     await updateBkfQuestion({
       variables: {
         _id: data?._id,
         points: inputData?.points,
         questionNumber: inputData?.questionNumber,
         classes: inputData?.classes,
-        options: inputData?.options,
         questionData: inputData?.questionData,
         chapters: inputData?.chapters,
-        questionType: "Bkf Image"
+        solution: inputData?.solution,
+        solution1: inputData?.solution1,
+        questionType: "Bkf Numerical Image"
       },
       onCompleted: ({ updateBkfQuestion }) => {
-        if (updateBkfQuestion === data?._id) {
+        if (updateBkfQuestion) {
           toast.success("Question Updated Successfully", {
             position: "bottom-left",
           });
@@ -124,38 +116,6 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
       },
     });
   };
-  // Add these handler functions before the return statement, after onSubmit
-  const addOption = () => {
-    const currentOptions = methods.getValues('options') || [];
-
-    // Create new option with data for all languages
-    const languages = data?.questionData?.map(qd => qd.language) || ['de'];
-    const newOption: OptionT = {
-      isCorrect: false,
-      optionData: languages.map(lang => ({
-        language: lang,
-        content: '',
-        audio: '',
-        highlightedWord: ''
-      }))
-    };
-
-    methods.setValue('options', [...currentOptions, newOption]);
-  };
-
-  const removeOption = (index: number) => {
-    const currentOptions = methods.getValues('options') || [];
-    if (currentOptions.length <= 1) {
-      toast.error("At least one option is required", {
-        position: "bottom-left",
-      });
-      return;
-    }
-
-    const updatedOptions = currentOptions.filter((_, i) => i !== index);
-    methods.setValue('options', updatedOptions);
-  };
-
   return (
     <div className="space-y-8">
       <Suspense fallback={<>loading ...</>}>
@@ -186,26 +146,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     });
                   }
                 }
-                if (errors.options) {
-                  const optionErrors = errors.options;
-                  const formOptions = methods.getValues("options") || [];
-                  if (Array.isArray(optionErrors)) {
-                    optionErrors.forEach((optErr, i) => {
-                      if (optErr?.optionData) {
-                        const optionDataErrors = optErr.optionData as any[];
-                        if (Array.isArray(optionDataErrors)) {
-                          optionDataErrors.forEach((odErr, j) => {
-                            if (odErr?.content) {
-                              const langCode = formOptions[i]?.optionData?.[j]?.language;
-                              const langName = langCode ? getLanguageName(langCode) || langCode : "unknown";
-                              messages.push(`Answer Option ${i + 1} (${langName}): Content is required`);
-                            }
-                          });
-                        }
-                      }
-                    });
-                  }
-                }
+                if ((errors as any).solution) messages.push("Solution is required");
                 toast.error(messages.join("\n") || "Please fix the validation errors", {
                   position: "bottom-left",
                   duration: 5000,
@@ -226,7 +167,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                 </Text>
               </div>
               <div className="md:col-span-3 space-y-4">
-                <div className="flex flex-col md:flex-row items-center gap-4 justify-between">
+                <div className="flex md:flex-row flex-col items-center gap-4 justify-between">
                   <div className="w-full md:w-auto">
                     <Input
                       label="Question Number"
@@ -275,7 +216,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     />
                   </div>
                 </div>
-                <div className="flex flex-col md:flex-row items-center gap-4 justify-between">
+                <div className="flex items-center flex-col md:flex-row gap-4 justify-between">
                   <div className="mx-auto w-full ">
                     <label
                       className={cn(
@@ -325,6 +266,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                   </div>
                 </div>
                 <div className="flex flex-col gap-4">
+
                   <Popover
                     size="lg"
                     content={() =>
@@ -361,45 +303,134 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                     />
                   </Popover>
                 </div>
+
                 <div className="flex flex-col gap-4">
                   <ImageUpload />
                 </div>
+                <div className="flex gap-4 items-center !mb-10">
+                  <Popover
+                    size="lg"
+                    content={() =>
+                      data?.questionData?.find(
+                        (data) => data?.language === "en"
+                      )?.textInputQuestionOne
+                    }
+                    placement="top"
+                  >
+                    <Input
+                      label="Text Input Question One"
+                      placeholder="Text Input Question One"
+                      {...methods.register(
+                        `questionData.${questionDataIndex}.textInputQuestionOne`
+                      )}
+                      value={methods.watch(
+                        `questionData.${questionDataIndex}.textInputQuestionOne`
+                      )}
 
-                <div className="flex flex-col gap-4">
-                  {methods.watch('options')?.map((optionData: OptionT, optionDataIndex) => (
-                    <Option
-                      key={optionData._id}
-                      optionDataIndex={optionDataIndex}
-                      option={optionData}
-                      onRemove={() => removeOption(optionDataIndex)}
+                      onChange={(e) => {
+                        methods.setValue(
+                          `questionData.${questionDataIndex}.textInputQuestionOne`, // Field name
+                          e.target.value // New value from the input
+                        );
+                      }}
+                      onMouseEnter={(e) => {
+                        if (e.isTrusted) {
+                          const audioSrc = methods.watch(
+                            `questionData.${questionDataIndex}.textInputQuestionOneAudio`
+                          )
+                          if (audioSrc) {
+                            const audio = new Audio();
+                            audio.src = audioSrc
+                            audio.play();
+                          }
+                        }
+                      }}
+                      className="w-full"
+                      helperClassName="border-4"
                     />
-                  ))}
-                  <div className="flex items-center justify-center">
-                    <Button
-                      type="button"
-                      onClick={addOption}
-                      variant="solid"
-                      color="primary"
-                      size="sm"
-                      className="flex items-center gap-1"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width={16}
-                        height={16}
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                      </svg>
-                      Add Option
-                    </Button>
-                  </div>
+                  </Popover>
+                  <Popover
+                    size="lg"
+                    content={() =>
+                      data?.questionData?.find(
+                        (data) => data?.language === "en"
+                      )?.textInputQuestionTwo
+                    }
+                    placement="top"
+                  >
+                    <Input
+                      label="Text Input Question Two"
+                      placeholder="Text Input Question Two"
+                      {...methods.register(
+                        `questionData.${questionDataIndex}.textInputQuestionTwo`
+                      )}
+                      value={methods.watch(
+                        `questionData.${questionDataIndex}.textInputQuestionTwo`
+                      )}
+
+                      onChange={(e) => {
+                        methods.setValue(
+                          `questionData.${questionDataIndex}.textInputQuestionTwo`, // Field name
+                          e.target.value // New value from the input
+                        );
+                      }}
+                      onMouseEnter={(e) => {
+                        if (e.isTrusted) {
+                          const audioSrc = methods.watch(
+                            `questionData.${questionDataIndex}.textInputQuestionTwoAudio`
+                          )
+                          if (
+                            audioSrc
+                          ) {
+                            const audio = new Audio();
+                            audio.src = audioSrc
+                            audio.play();
+                          }
+                        }
+                      }}
+                      className="w-full"
+                      helperClassName="border-4"
+                    />
+                  </Popover>
+                  <Popover
+                    size="lg"
+                    content={() =>
+                      data?.questionData?.find(
+                        (data) => data?.language === "en"
+                      )?.textInputQuestionThree
+                    }
+                    placement="top"
+                  >
+                    <Input
+                      label="Text Input Question Three"
+                      placeholder="Text Input Question Three"
+                      {...methods.register(
+                        `questionData.${questionDataIndex}.textInputQuestionThree`
+                      )}
+                      value={methods.watch(
+                        `questionData.${questionDataIndex}.textInputQuestionThree`
+                      )}
+
+                      onChange={(e) => {
+                        methods.setValue(
+                          `questionData.${questionDataIndex}.textInputQuestionThree`, // Field name
+                          e.target.value // New value from the input
+                        );
+                      }}
+                      onMouseEnter={(e) => {
+                        if (e.isTrusted) {
+                          const audioSrc = methods.watch(`questionData.${questionDataIndex}.textInputQuestionThreeAudio`)
+                          if (audioSrc) {
+                            const audio = new Audio();
+                            audio.src = audioSrc
+                            audio.play();
+                          }
+                        }
+                      }}
+                      className="w-full"
+                      helperClassName="border-4"
+                    />
+                  </Popover>
                 </div>
               </div>
             </div>
