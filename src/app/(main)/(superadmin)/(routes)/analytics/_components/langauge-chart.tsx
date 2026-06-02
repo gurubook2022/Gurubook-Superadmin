@@ -41,8 +41,8 @@ const LangaugeChart = ({ data }: LangaugeChartProps) => {
             >
               <defs>
                 <linearGradient id="count" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#027368" stopOpacity={0.1} />
-                  <stop offset="95%" stopColor="#027368" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1} />
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="8 10" strokeOpacity={0.435} />
@@ -57,7 +57,7 @@ const LangaugeChart = ({ data }: LangaugeChartProps) => {
               <Area
                 type="monotone"
                 dataKey="count"
-                stroke="#027368"
+                stroke="#6366f1"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#count)"

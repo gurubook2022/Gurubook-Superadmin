@@ -46,7 +46,7 @@
     /* For rgb(44 211 255 / <alpha-value>) = #0cf5d0 */
     --primary-light: 12 245 208;
 
-    /* For rgb(1 196 255 / <alpha-value>) = #027368 */
+    /* For rgb(1 196 255 / <alpha-value>) = #6366f1 */
     --primary-default: 2 115 104;
 
     /* For rgb(0 153 212 / <alpha-value>) = #008a7b */
@@ -275,7 +275,9 @@
 
   /* experimental */
   .card-shadow {
-    box-shadow: 0px 1px 0 rgba(0, 0, 0, 0.02), 0px 2px 6px rgba(0, 0, 0, 0.05);
+    box-shadow:
+      0px 1px 0 rgba(0, 0, 0, 0.02),
+      0px 2px 6px rgba(0, 0, 0, 0.05);
   }
 }
 
