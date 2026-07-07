@@ -435,18 +435,18 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                         label="Remarks"
                         placeholder="Remarks"
                         {...field}
-                        onMouseEnter={(e) => {
-                          if (e.isTrusted) {
-                            const audioUrl = methods.getValues(
-                              `questionData.${questionDataIndex}.remarksAudio`
-                            );
-                            if (audioUrl) {
-                              const audio = new Audio();
-                              audio.src = audioUrl;
-                              audio.play();
-                            }
-                          }
-                        }}
+                        // onMouseEnter={(e) => {
+                        //   if (e.isTrusted) {
+                        //     const audioUrl = methods.getValues(
+                        //       `questionData.${questionDataIndex}.remarksAudio`
+                        //     );
+                        //     if (audioUrl) {
+                        //       const audio = new Audio();
+                        //       audio.src = audioUrl;
+                        //       audio.play();
+                        //     }
+                        //   }
+                        // }}
                         helperClassName="border-4"
                       />
                     </Popover></>

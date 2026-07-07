@@ -11,7 +11,7 @@ export const bkfSoloQuestionFormSchema = z.object({
         subTitle: z.string().optional(),
         subTitleAudio: z.string().optional(),
         remarks: z.string().optional(),
-        remarksAudio: z.string().optional()
+        // remarksAudio: z.string().optional()
     })).optional(),
     classes: z.array(z.string()).nonempty({ message: "Atleast one class is required" }),
     chapters: z.array(z.string()).nonempty({ message: "Atleast one chapter is required" }),

@@ -11,7 +11,7 @@ export const bkfNumericalQuestionFormSchema = z.object({
         subTitle: z.string().optional(),
         subTitleAudio: z.string().optional(),
         remarks: z.string().optional(),
-        remarksAudio: z.string().optional(),
+        // remarksAudio: z.string().optional(),
         textInputQuestionOne: z.string().optional(),
         textInputQuestionOneAudio: z.string().optional(),
         textInputQuestionTwo: z.string().optional(),

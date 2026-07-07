@@ -11,7 +11,7 @@ export const soloQuestionFormSchema = z.object({
         subTitle: z.string().optional(),
         subTitleAudio: z.string().optional(),
         remarks: z.string().optional(),
-        remarksAudio: z.string().optional()
+        // remarksAudio: z.string().optional()
     })),
     classes: z.array(z.string()).min(1, { message: "At least one class is required" }),
     chapters: z.array(z.string()).min(1, { message: "At least one chapter is required" }),

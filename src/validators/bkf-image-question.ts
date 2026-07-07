@@ -9,7 +9,7 @@ export const bkfImageQuestionFormSchema = z.object({
         title: z.string().min(1, { message: "Title is required" }),
         titleAudio: z.string(),
         remarks: z.string(),
-        remarksAudio: z.string(),
+        // remarksAudio: z.string(),
     })).optional(),
     classes: z.array(z.string()).nonempty({ message: "Atleast one class is required" }),
     chapters: z.array(z.string()).nonempty({ message: "Atleast one chapter is required" }),

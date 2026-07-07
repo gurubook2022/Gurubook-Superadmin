@@ -58,7 +58,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
       subTitle: qd?.subTitle ?? "",
       subTitleAudio: qd?.subTitleAudio ?? "",
       remarks: qd?.remarks ?? "",
-      remarksAudio: qd?.remarksAudio ?? "",
+      // remarksAudio: qd?.remarksAudio ?? "",
       imageText: qd?.imageText ?? "",
       imageTextAudio: qd?.imageTextAudio ?? "",
       textInputQuestionOne: qd?.textInputQuestionOne ?? "",

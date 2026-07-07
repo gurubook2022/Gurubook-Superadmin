@@ -49,7 +49,7 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
       subTitle: qd?.subTitle ?? "",
       subTitleAudio: qd?.subTitleAudio ?? "",
       remarks: qd?.remarks ?? "",
-      remarksAudio: qd?.remarksAudio ?? "",
+      // remarksAudio: qd?.remarksAudio ?? "",
       imageText: qd?.imageText ?? "",
       imageTextAudio: qd?.imageTextAudio ?? "",
     })) ?? [],
@@ -487,18 +487,18 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                         label="Remarks"
                         placeholder="Remarks"
                         {...field}
-                        onMouseEnter={(e) => {
-                          if (e.isTrusted) {
-                            const audioUrl = methods.getValues(
-                              `questionData.${questionDataIndex}.remarksAudio`
-                            );
-                            if (audioUrl) {
-                              const audio = new Audio();
-                              audio.src = audioUrl;
-                              audio.play();
-                            }
-                          }
-                        }}
+                        // onMouseEnter={(e) => {
+                        //   if (e.isTrusted) {
+                        //     const audioUrl = methods.getValues(
+                        //       `questionData.${questionDataIndex}.remarksAudio`
+                        //     );
+                        //     if (audioUrl) {
+                        //       const audio = new Audio();
+                        //       audio.src = audioUrl;
+                        //       audio.play();
+                        //     }
+                        //   }
+                        // }}
                         helperClassName="border-4"
                       />
                     </Popover></>

@@ -10,7 +10,7 @@ export const videoQuestionFormSchema = z.object({
         subTitle: z.string().optional(),
         subTitleAudio: z.string(),
         remarks: z.string(),
-        remarksAudio: z.string(),
+        // remarksAudio: z.string(),
     })).optional(),
     classes: z.array(z.string()).nonempty({ message: "Atleast one class is required" }),
     chapters: z.array(z.string()).nonempty({ message: "Atleast one chapter is required" }),

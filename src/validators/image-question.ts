@@ -12,7 +12,7 @@ export const imageQuestionFormSchema = z.object({
         subTitle: z.string(),
         subTitleAudio: z.string(),
         remarks: z.string(),
-        remarksAudio: z.string(),
+        // remarksAudio: z.string(),
         imageText: z.string(),
         imageTextAudio: z.string()
     })).optional(),

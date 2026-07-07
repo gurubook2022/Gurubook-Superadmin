@@ -39,7 +39,7 @@ export type QuestionData = {
     subTitle?: string,
     subTitleAudio?: string,
     remarks: string,
-    remarksAudio: string,
+    // remarksAudio: string,
     textInputQuestionOne?: string,
     textInputQuestionOneAudio?: string,
     textInputQuestionTwo?: string,
@@ -78,7 +78,7 @@ export type BKFQuestion = {
     solution?: string,
     solution1?: string,
     imageUrl?: string,
-    questionData: Omit<QuestionData, "imageText" | "imageTextAudio" | "remarksAudio" | "subTitle" | "subTitleAudio">[],
+    questionData: Omit<QuestionData, "imageText" | "imageTextAudio" | "subTitle" | "subTitleAudio">[],
 
     options: Option[],
     createdAt: Date,

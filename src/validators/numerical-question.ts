@@ -13,7 +13,7 @@ export const numericalQuestionFormSchema = z.object({
         subTitle: z.string().optional(),
         subTitleAudio: z.string().optional(),
         remarks: z.string().optional(),
-        remarksAudio: z.string(),
+        // remarksAudio: z.string(),
         textInputQuestionOne: z.string().optional(),
         textInputQuestionOneAudio: z.string(),
         textInputQuestionTwo: z.string().optional(),
