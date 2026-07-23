@@ -80,6 +80,11 @@ export const getLanguageName = (selectedLanguageCode: string) => {
   return selectedLanguage?.title
 }
 
+// Matches the audio key convention used by the TTS pipeline: audios/{questionNumber}-{field}-{lang}.mp3
+export const buildAudioFileName = (questionNumber: string, field: string, lang: string) => {
+  return `${questionNumber}-${field}-${lang}`
+}
+
 export const removeExtension = (filename: string) => {
   const parts = filename.split('.');
 

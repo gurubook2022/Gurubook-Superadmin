@@ -6,14 +6,23 @@ import { useEffect, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { Popover } from "@/components/ui/popover";
 import { Option as OptionT } from "../types";
+import AudioUploadButton from "@/components/audio-upload-button";
 
 interface OptionProps {
   optionDataIndex: number;
   option: OptionT;
   onRemove: () => void; // Add this
+  audioFileName: string;
+  onAudioUploaded: (key: string) => void;
 }
 
-const Option = ({ optionDataIndex, option, onRemove }: OptionProps) => {
+const Option = ({
+  optionDataIndex,
+  option,
+  onRemove,
+  audioFileName,
+  onAudioUploaded,
+}: OptionProps) => {
   const searchParams = useSearchParams();
   const currentLang = searchParams.get("lang") || "de";
 
@@ -96,41 +105,57 @@ const Option = ({ optionDataIndex, option, onRemove }: OptionProps) => {
         Remove
       </Button>
       <div className="flex flex-col gap-2">
-        <Controller
-          key={`${optionDataIndex}-${optionIndex}-${currentLang}`} // Force remount on language change
-          control={control}
-          name={`options.${optionDataIndex}.optionData.${optionIndex}.content`}
-          render={({ field: { onChange } }) => (
-            <>
-              <Popover
-                size="lg"
-                content={() =>
-                  option?.optionData?.find((data) => data?.language === "en")
-                    ?.content
-                }
-                placement="top"
-              >
-                <Input
-                  label={`Answer Option ${optionDataIndex + 1}`}
-                  placeholder="Option Text"
-                  {...register(
-                    `options.${optionDataIndex}.optionData.${optionIndex}.content`
-                  )}
-                  value={watch(
-                    `options.${optionDataIndex}.optionData.${optionIndex}.content`
-                  )}
-                  onChange={(e) => {
-                    setValue(
-                      `options.${optionDataIndex}.optionData.${optionIndex}.content`,
-                      e.target.value
-                    );
-                  }}
-                  helperClassName="border-4"
-                />
-              </Popover>
-            </>
-          )}
-        />
+        <div className="flex items-end gap-2">
+          <Controller
+            key={`${optionDataIndex}-${optionIndex}-${currentLang}`} // Force remount on language change
+            control={control}
+            name={`options.${optionDataIndex}.optionData.${optionIndex}.content`}
+            render={({ field: { onChange } }) => (
+              <>
+                <Popover
+                  size="lg"
+                  content={() =>
+                    option?.optionData?.find((data) => data?.language === "en")
+                      ?.content
+                  }
+                  placement="top"
+                >
+                  <Input
+                    label={`Answer Option ${optionDataIndex + 1}`}
+                    placeholder="Option Text"
+                    {...register(
+                      `options.${optionDataIndex}.optionData.${optionIndex}.content`
+                    )}
+                    value={watch(
+                      `options.${optionDataIndex}.optionData.${optionIndex}.content`
+                    )}
+                    onMouseEnter={(e) => {
+                      if (e.isTrusted) {
+                        const audioUrl = watch(
+                          `options.${optionDataIndex}.optionData.${optionIndex}.audio`
+                        );
+                        if (audioUrl) {
+                          const audio = new Audio();
+                          audio.src = audioUrl;
+                          audio.play();
+                        }
+                      }
+                    }}
+                    onChange={(e) => {
+                      setValue(
+                        `options.${optionDataIndex}.optionData.${optionIndex}.content`,
+                        e.target.value
+                      );
+                    }}
+                    className="flex-1"
+                    helperClassName="border-4"
+                  />
+                </Popover>
+              </>
+            )}
+          />
+          <AudioUploadButton fileName={audioFileName} onUploaded={onAudioUploaded} />
+        </div>
 
         {/* Highlighted Word Section - Only show for correct answers */}
         {watch(`options.${optionDataIndex}.isCorrect`) && (

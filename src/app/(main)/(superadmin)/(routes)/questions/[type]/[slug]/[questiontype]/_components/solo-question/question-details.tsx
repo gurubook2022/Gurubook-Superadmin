@@ -23,6 +23,8 @@ import { useMutation } from "@apollo/client";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import AudioUploadButton from "@/components/audio-upload-button";
+import { buildAudioFileName } from "@/lib/utils";
 
 interface QuestionDetailsProps {
   data: DlQuestion;
@@ -142,6 +144,82 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
 
     const updatedOptions = currentOptions.filter((_, i) => i !== index);
     methods.setValue('options', updatedOptions);
+  };
+
+  // Auto-saves a single questionData audio field, based on the pristine (last-loaded) data
+  // rather than the live form state, so unrelated unsaved edits are not persisted.
+  const saveAudioField = async (
+    audioFieldName: "titleAudio" | "subTitleAudio",
+    key: string
+  ) => {
+    methods.setValue(`questionData.${questionDataIndex}.${audioFieldName}`, key, {
+      shouldDirty: true,
+    });
+
+    const patchedQuestionData = defaultValues.questionData.map((qd, i) =>
+      i === questionDataIndex ? { ...qd, [audioFieldName]: key } : qd
+    );
+
+    try {
+      await updateSoloQuestion({
+        variables: {
+          _id: data?._id,
+          points: defaultValues.points,
+          questionNumber: defaultValues.questionNumber,
+          classes: defaultValues.classes,
+          options: defaultValues.options,
+          questionData: patchedQuestionData,
+          chapters: defaultValues.chapters,
+        },
+      });
+      refresh();
+    } catch (error) {
+      console.error("Audio field save error:", error);
+      toast.error("Failed to save audio", { position: "bottom-left" });
+    }
+  };
+
+  // Auto-saves a single option's audio field the same way.
+  const saveOptionAudioField = async (optionDataIndex: number, key: string) => {
+    const optionLangIndex = getLanguageIndex(
+      defaultValues.options?.[optionDataIndex]?.optionData?.map((od: any) => od.language),
+      currentLang
+    );
+
+    methods.setValue(
+      `options.${optionDataIndex}.optionData.${optionLangIndex}.audio`,
+      key,
+      { shouldDirty: true }
+    );
+
+    const patchedOptions = defaultValues.options.map((opt, i) =>
+      i === optionDataIndex
+        ? {
+          ...opt,
+          optionData: opt.optionData.map((od: any, j: number) =>
+            j === optionLangIndex ? { ...od, audio: key } : od
+          ),
+        }
+        : opt
+    );
+
+    try {
+      await updateSoloQuestion({
+        variables: {
+          _id: data?._id,
+          points: defaultValues.points,
+          questionNumber: defaultValues.questionNumber,
+          classes: defaultValues.classes,
+          options: patchedOptions,
+          questionData: defaultValues.questionData,
+          chapters: defaultValues.chapters,
+        },
+      });
+      refresh();
+    } catch (error) {
+      console.error("Option audio save error:", error);
+      toast.error("Failed to save audio", { position: "bottom-left" });
+    }
   };
 
   return (
@@ -315,80 +393,92 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                 </div>
                 <div className="flex flex-col gap-4">
 
-                  <Controller
-                    key={`${questionDataIndex}-${currentLang}-title`}
-                    control={methods.control}
-                    name={`questionData.${questionDataIndex}.title`}
-                    render={({ field }) => (
-                      <Popover
-                        size="lg"
-                        content={() =>
-                          data?.questionData?.find(
-                            (data: QuestionData) => data?.language === "en"
-                          )?.title
-                        }
-                        placement="top"
-                      >
-                        <Input
-                          label="Title"
-                          placeholder="Title"
-                          {...field}
-                          onMouseEnter={(e) => {
-                            if (e.isTrusted) {
-                              const audioUrl = methods.getValues(
-                                `questionData.${questionDataIndex}.titleAudio`
-                              );
-                              if (audioUrl) {
-                                const audio = new Audio();
-                                audio.src = audioUrl;
-                                audio.play();
+                  <div className="flex items-end gap-2">
+                    <Controller
+                      key={`${questionDataIndex}-${currentLang}-title`}
+                      control={methods.control}
+                      name={`questionData.${questionDataIndex}.title`}
+                      render={({ field }) => (
+                        <Popover
+                          size="lg"
+                          content={() =>
+                            data?.questionData?.find(
+                              (data: QuestionData) => data?.language === "en"
+                            )?.title
+                          }
+                          placement="top"
+                        >
+                          <Input
+                            label="Title"
+                            placeholder="Title"
+                            {...field}
+                            onMouseEnter={(e) => {
+                              if (e.isTrusted) {
+                                const audioUrl = methods.getValues(
+                                  `questionData.${questionDataIndex}.titleAudio`
+                                );
+                                if (audioUrl) {
+                                  const audio = new Audio();
+                                  audio.src = audioUrl;
+                                  audio.play();
+                                }
                               }
-                            }
-                          }}
-                          helperClassName="border-4"
-                        />
-                      </Popover>
-                    )}
-                  />
+                            }}
+                            className="flex-1"
+                            helperClassName="border-4"
+                          />
+                        </Popover>
+                      )}
+                    />
+                    <AudioUploadButton
+                      fileName={buildAudioFileName(data?.questionNumber, "title", currentLang)}
+                      onUploaded={(key) => saveAudioField("titleAudio", key)}
+                    />
+                  </div>
 
-
-                  <Controller
-                    control={methods.control}
-                    key={`${questionDataIndex}-${currentLang}-subTitle`}
-                    name={`questionData.${questionDataIndex}.subTitle`}
-                    render={({ field }) => (
-                      <Popover
-                        size="lg"
-                        content={() =>
-                          data?.questionData?.find(
-                            (data: QuestionData) => data?.language === "en"
-                          )?.subTitle
-                        }
-                        placement="top"
-                      >
-                        <Input
-                          label="Sub Title"
-                          placeholder="Sub Title"
-                          {...field}
-                          value={field.value ?? ""}
-                          onMouseEnter={(e) => {
-                            if (e.isTrusted) {
-                              const audioUrl = methods.getValues(
-                                `questionData.${questionDataIndex}.subTitleAudio`
-                              );
-                              if (audioUrl) {
-                                const audio = new Audio();
-                                audio.src = audioUrl;
-                                audio.play();
+                  <div className="flex items-end gap-2">
+                    <Controller
+                      control={methods.control}
+                      key={`${questionDataIndex}-${currentLang}-subTitle`}
+                      name={`questionData.${questionDataIndex}.subTitle`}
+                      render={({ field }) => (
+                        <Popover
+                          size="lg"
+                          content={() =>
+                            data?.questionData?.find(
+                              (data: QuestionData) => data?.language === "en"
+                            )?.subTitle
+                          }
+                          placement="top"
+                        >
+                          <Input
+                            label="Sub Title"
+                            placeholder="Sub Title"
+                            {...field}
+                            value={field.value ?? ""}
+                            onMouseEnter={(e) => {
+                              if (e.isTrusted) {
+                                const audioUrl = methods.getValues(
+                                  `questionData.${questionDataIndex}.subTitleAudio`
+                                );
+                                if (audioUrl) {
+                                  const audio = new Audio();
+                                  audio.src = audioUrl;
+                                  audio.play();
+                                }
                               }
-                            }
-                          }}
-                          className="w-56"
-                          helperClassName="border-4"
-                        />
-                      </Popover>
-                    )}
-                  />
+                            }}
+                            className="flex-1"
+                            helperClassName="border-4"
+                          />
+                        </Popover>
+                      )}
+                    />
+                    <AudioUploadButton
+                      fileName={buildAudioFileName(data?.questionNumber, "subTitle", currentLang)}
+                      onUploaded={(key) => saveAudioField("subTitleAudio", key)}
+                    />
+                  </div>
                 </div>
                 <div className="flex flex-col gap-4">
                   {methods.watch('options')?.map((optionData: OptionT, optionDataIndex) => (
@@ -397,6 +487,12 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                       optionDataIndex={optionDataIndex}
                       option={optionData}
                       onRemove={() => removeOption(optionDataIndex)}
+                      audioFileName={buildAudioFileName(
+                        data?.questionNumber,
+                        `a${optionDataIndex + 1}`,
+                        currentLang
+                      )}
+                      onAudioUploaded={(key) => saveOptionAudioField(optionDataIndex, key)}
                     />
                   ))}
                   <div className="flex items-center justify-center">

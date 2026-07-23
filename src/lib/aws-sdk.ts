@@ -16,13 +16,13 @@ const s3Client = new S3Client({
     },
     requestChecksumCalculation: "WHEN_REQUIRED"
 });
-const uploadFileToAWSS3Bucket = async (file: File, folder: string) => {
+const uploadFileToAWSS3Bucket = async (file: File, folder: string, fileNameOverride?: string) => {
     // Step 1: Get presigned URL from your backend
     const response = await fetch("/api/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            fileName: file.name,
+            fileName: fileNameOverride ?? file.name,
             fileType: file.type,
             folder: folder,
         }),

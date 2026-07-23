@@ -22,6 +22,8 @@ import { useMutation } from "@apollo/client";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import AudioUploadButton from "@/components/audio-upload-button";
+import { buildAudioFileName } from "@/lib/utils";
 
 interface QuestionDetailsProps {
   data: DlQuestion;
@@ -115,6 +117,47 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
       toast.error("Failed to update question", {
         position: "bottom-left",
       });
+    }
+  };
+
+  // Auto-saves a single questionData audio field, based on the pristine (last-loaded) data
+  // rather than the live form state, so unrelated unsaved edits are not persisted.
+  const saveAudioField = async (
+    audioFieldName:
+      | "titleAudio"
+      | "subTitleAudio"
+      | "imageTextAudio"
+      | "textInputQuestionOneAudio"
+      | "textInputQuestionTwoAudio"
+      | "textInputQuestionThreeAudio",
+    key: string
+  ) => {
+    methods.setValue(`questionData.${questionDataIndex}.${audioFieldName}`, key, {
+      shouldDirty: true,
+    });
+
+    const patchedQuestionData = defaultValues.questionData.map((qd, i) =>
+      i === questionDataIndex ? { ...qd, [audioFieldName]: key } : qd
+    );
+
+    try {
+      await updateNumericalQuestion({
+        variables: {
+          _id: data?._id,
+          points: defaultValues.points,
+          questionNumber: defaultValues.questionNumber,
+          classes: defaultValues.classes,
+          questionData: patchedQuestionData,
+          chapters: defaultValues.chapters,
+          solution: defaultValues.solution,
+          solution1: defaultValues.solution1,
+          imageUrl: defaultValues.imageUrl,
+        },
+      });
+      refresh();
+    } catch (error) {
+      console.error("Audio field save error:", error);
+      toast.error("Failed to save audio", { position: "bottom-left" });
     }
   };
 
@@ -270,195 +313,226 @@ const QuestionDetails = ({ data }: QuestionDetailsProps) => {
                 </div>
                 <div className="flex flex-col gap-4">
 
-                  <Controller
-                    key={`${questionDataIndex}-${currentLang}-title`}
-                    control={methods.control}
-                    name={`questionData.${questionDataIndex}.title`}
-                    render={({ field }) => (
-                      <Popover
-                        size="lg"
-                        content={() =>
-                          data?.questionData?.find(
-                            (data: QuestionData) => data?.language === "en"
-                          )?.title
-                        }
-                        placement="top"
-                      >
-                        <Input
-                          label="Title"
-                          placeholder="Title"
-                          {...field}
-                          onMouseEnter={(e) => {
-                            if (e.isTrusted) {
-                              const audioUrl = methods.getValues(
-                                `questionData.${questionDataIndex}.titleAudio`
-                              );
-                              if (audioUrl) {
-                                const audio = new Audio();
-                                audio.src = audioUrl;
-                                audio.play();
-                              }
-                            }
-                          }}
-                          helperClassName="border-4"
-                        />
-                      </Popover>
-                    )}
-                  />
-                  <Popover
-                    size="lg"
-                    content={() =>
-                      data?.questionData?.find(
-                        (data) => data?.language === "en"
-                      )?.subTitle
-                    }
-                    placement="top"
-                  >
-                    <Input
-                      label="Sub Title"
-                      placeholder="Sub Title"
-                      {...methods.register(
-                        `questionData.${questionDataIndex}.subTitle`
-                      )}
-                      value={methods.watch(
-                        `questionData.${questionDataIndex}.subTitle`
-                      )}
-                      onMouseEnter={(e) => {
-                        if (e.isTrusted) {
-                          if (
-                            methods.watch(
-                              `questionData.${questionDataIndex}.subTitleAudio`
-                            )
-                          ) {
-                            const audio = new Audio();
-                            audio.src = methods.watch(
-                              `questionData.${questionDataIndex}.subTitleAudio`
-                            )!;
-                            audio.play();
+                  <div className="flex items-end gap-2">
+                    <Controller
+                      key={`${questionDataIndex}-${currentLang}-title`}
+                      control={methods.control}
+                      name={`questionData.${questionDataIndex}.title`}
+                      render={({ field }) => (
+                        <Popover
+                          size="lg"
+                          content={() =>
+                            data?.questionData?.find(
+                              (data: QuestionData) => data?.language === "en"
+                            )?.title
                           }
-                        }
-                      }}
-                      className="w-56"
-                      helperClassName="border-4"
+                          placement="top"
+                        >
+                          <Input
+                            label="Title"
+                            placeholder="Title"
+                            {...field}
+                            onMouseEnter={(e) => {
+                              if (e.isTrusted) {
+                                const audioUrl = methods.getValues(
+                                  `questionData.${questionDataIndex}.titleAudio`
+                                );
+                                if (audioUrl) {
+                                  const audio = new Audio();
+                                  audio.src = audioUrl;
+                                  audio.play();
+                                }
+                              }
+                            }}
+                            className="flex-1"
+                            helperClassName="border-4"
+                          />
+                        </Popover>
+                      )}
                     />
-                  </Popover>
+                    <AudioUploadButton
+                      fileName={buildAudioFileName(data?.questionNumber, "title", currentLang)}
+                      onUploaded={(key) => saveAudioField("titleAudio", key)}
+                    />
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <Popover
+                      size="lg"
+                      content={() =>
+                        data?.questionData?.find(
+                          (data) => data?.language === "en"
+                        )?.subTitle
+                      }
+                      placement="top"
+                    >
+                      <Input
+                        label="Sub Title"
+                        placeholder="Sub Title"
+                        {...methods.register(
+                          `questionData.${questionDataIndex}.subTitle`
+                        )}
+                        value={methods.watch(
+                          `questionData.${questionDataIndex}.subTitle`
+                        )}
+                        onMouseEnter={(e) => {
+                          if (e.isTrusted) {
+                            if (
+                              methods.watch(
+                                `questionData.${questionDataIndex}.subTitleAudio`
+                              )
+                            ) {
+                              const audio = new Audio();
+                              audio.src = methods.watch(
+                                `questionData.${questionDataIndex}.subTitleAudio`
+                              )!;
+                              audio.play();
+                            }
+                          }
+                        }}
+                        className="flex-1"
+                        helperClassName="border-4"
+                      />
+                    </Popover>
+                    <AudioUploadButton
+                      fileName={buildAudioFileName(data?.questionNumber, "subTitle", currentLang)}
+                      onUploaded={(key) => saveAudioField("subTitleAudio", key)}
+                    />
+                  </div>
                 </div>
 
 
 
-                <div className="gap-4 md:flex-row flex-col flex items-center">
-                  <Popover
-                    size="lg"
-                    content={() =>
-                      data?.questionData?.find(
-                        (data) => data?.language === "en"
-                      )?.textInputQuestionOne
-                    }
-                    placement="top"
-                  >
-                    <Input
-                      label="Text Input Question One"
-                      placeholder="Text Input Question One"
-                      {...methods.register(
-                        `questionData.${questionDataIndex}.textInputQuestionOne`
-                      )}
-                      value={methods.watch(
-                        `questionData.${questionDataIndex}.textInputQuestionOne`
-                      )}
-                      onMouseEnter={(e) => {
-                        if (e.isTrusted) {
-                          if (
-                            methods.watch(
-                              `questionData.${questionDataIndex}.textInputQuestionOneAudio`
-                            )
-                          ) {
-                            const audio = new Audio();
-                            audio.src = methods.watch(
-                              `questionData.${questionDataIndex}.textInputQuestionOneAudio`
-                            );
-                            audio.play();
+                <div className="gap-4 md:flex-row flex-col flex items-end">
+                  <div className="flex items-end gap-2 w-full">
+                    <Popover
+                      size="lg"
+                      content={() =>
+                        data?.questionData?.find(
+                          (data) => data?.language === "en"
+                        )?.textInputQuestionOne
+                      }
+                      placement="top"
+                    >
+                      <Input
+                        label="Text Input Question One"
+                        placeholder="Text Input Question One"
+                        {...methods.register(
+                          `questionData.${questionDataIndex}.textInputQuestionOne`
+                        )}
+                        value={methods.watch(
+                          `questionData.${questionDataIndex}.textInputQuestionOne`
+                        )}
+                        onMouseEnter={(e) => {
+                          if (e.isTrusted) {
+                            if (
+                              methods.watch(
+                                `questionData.${questionDataIndex}.textInputQuestionOneAudio`
+                              )
+                            ) {
+                              const audio = new Audio();
+                              audio.src = methods.watch(
+                                `questionData.${questionDataIndex}.textInputQuestionOneAudio`
+                              );
+                              audio.play();
+                            }
                           }
-                        }
-                      }}
-                      className="w-full"
-                      helperClassName="border-4"
+                        }}
+                        className="flex-1"
+                        helperClassName="border-4"
+                      />
+                    </Popover>
+                    <AudioUploadButton
+                      fileName={buildAudioFileName(data?.questionNumber, "textInputQuestionOne", currentLang)}
+                      onUploaded={(key) => saveAudioField("textInputQuestionOneAudio", key)}
                     />
-                  </Popover>
-                  <Popover
-                    size="lg"
-                    content={() =>
-                      data?.questionData?.find(
-                        (data) => data?.language === "en"
-                      )?.textInputQuestionTwo
-                    }
-                    placement="top"
-                  >
-                    <Input
-                      label="Text Input Question Two"
-                      placeholder="Text Input Question Two"
-                      {...methods.register(
-                        `questionData.${questionDataIndex}.textInputQuestionTwo`
-                      )}
-                      value={methods.watch(
-                        `questionData.${questionDataIndex}.textInputQuestionTwo`
-                      )}
-                      onMouseEnter={(e) => {
-                        if (e.isTrusted) {
-                          if (
-                            methods.watch(
-                              `questionData.${questionDataIndex}.textInputQuestionTwoAudio`
-                            )
-                          ) {
-                            const audio = new Audio();
-                            audio.src = methods.watch(
-                              `questionData.${questionDataIndex}.textInputQuestionTwoAudio`
-                            );
-                            audio.play();
+                  </div>
+                  <div className="flex items-end gap-2 w-full">
+                    <Popover
+                      size="lg"
+                      content={() =>
+                        data?.questionData?.find(
+                          (data) => data?.language === "en"
+                        )?.textInputQuestionTwo
+                      }
+                      placement="top"
+                    >
+                      <Input
+                        label="Text Input Question Two"
+                        placeholder="Text Input Question Two"
+                        {...methods.register(
+                          `questionData.${questionDataIndex}.textInputQuestionTwo`
+                        )}
+                        value={methods.watch(
+                          `questionData.${questionDataIndex}.textInputQuestionTwo`
+                        )}
+                        onMouseEnter={(e) => {
+                          if (e.isTrusted) {
+                            if (
+                              methods.watch(
+                                `questionData.${questionDataIndex}.textInputQuestionTwoAudio`
+                              )
+                            ) {
+                              const audio = new Audio();
+                              audio.src = methods.watch(
+                                `questionData.${questionDataIndex}.textInputQuestionTwoAudio`
+                              );
+                              audio.play();
+                            }
                           }
-                        }
-                      }}
-                      className="w-full"
-                      helperClassName="border-4"
+                        }}
+                        className="flex-1"
+                        helperClassName="border-4"
+                      />
+                    </Popover>
+                    <AudioUploadButton
+                      fileName={buildAudioFileName(data?.questionNumber, "textInputQuestionTwo", currentLang)}
+                      onUploaded={(key) => saveAudioField("textInputQuestionTwoAudio", key)}
                     />
-                  </Popover>
+                  </div>
 
-                  <Popover
-                    size="lg"
-                    content={() =>
-                      data?.questionData?.find(
-                        (data) => data?.language === "en"
-                      )?.textInputQuestionThree
-                    }
-                    placement="top"
-                  >
-                    <Input
-                      label="Text Input Question Three"
-                      placeholder="Text Input Question Three"
-                      {...methods.register(
-                        `questionData.${questionDataIndex}.textInputQuestionThree`
-                      )}
-                      value={methods.watch(
-                        `questionData.${questionDataIndex}.textInputQuestionThree`
-                      )}
-                      onMouseEnter={(e) => {
-                        if (e.isTrusted) {
-                          if (
-                            methods.watch(
-                              `questionData.${questionDataIndex}.textInputQuestionThreeAudio`
-                            )
-                          ) {
-                            const audio = new Audio();
-                            audio.src = methods.watch(
-                              `questionData.${questionDataIndex}.textInputQuestionThreeAudio`
-                            );
-                            audio.play();
+                  <div className="flex items-end gap-2 w-full">
+                    <Popover
+                      size="lg"
+                      content={() =>
+                        data?.questionData?.find(
+                          (data) => data?.language === "en"
+                        )?.textInputQuestionThree
+                      }
+                      placement="top"
+                    >
+                      <Input
+                        label="Text Input Question Three"
+                        placeholder="Text Input Question Three"
+                        {...methods.register(
+                          `questionData.${questionDataIndex}.textInputQuestionThree`
+                        )}
+                        value={methods.watch(
+                          `questionData.${questionDataIndex}.textInputQuestionThree`
+                        )}
+                        onMouseEnter={(e) => {
+                          if (e.isTrusted) {
+                            if (
+                              methods.watch(
+                                `questionData.${questionDataIndex}.textInputQuestionThreeAudio`
+                              )
+                            ) {
+                              const audio = new Audio();
+                              audio.src = methods.watch(
+                                `questionData.${questionDataIndex}.textInputQuestionThreeAudio`
+                              );
+                              audio.play();
+                            }
                           }
-                        }
-                      }}
-                      className="w-full"
-                      helperClassName="border-4"
+                        }}
+                        className="flex-1"
+                        helperClassName="border-4"
+                      />
+                    </Popover>
+                    <AudioUploadButton
+                      fileName={buildAudioFileName(data?.questionNumber, "textInputQuestionThree", currentLang)}
+                      onUploaded={(key) => saveAudioField("textInputQuestionThreeAudio", key)}
                     />
-                  </Popover>
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-4 !mb-10">
