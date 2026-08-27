@@ -1,18 +1,50 @@
 import { gql } from '@apollo/client';
 
 export const REGISTER_ADMIN = gql`
-mutation RegisterAdmin($firstName: String!, $lastName: String!, $email: String!, $password: String!) {
-    registerAdmin(firstName: $firstName, lastName: $lastName, email: $email, password: $password) {
+mutation RegisterAdmin($firstName: String!, $lastName: String!, $email: String!, $password: String!, $drivingSchoolName: String!, $contactPerson: String!, $phone: String!, $address: AddressInput!) {
+    registerAdmin(firstName: $firstName, lastName: $lastName, email: $email, password: $password, drivingSchoolName: $drivingSchoolName, contactPerson: $contactPerson, phone: $phone, address: $address) {
       _id
       firstName
       lastName
       email
       role
+      drivingSchoolName
+      partnerId
+      contactPerson
+      phone
+      address {
+        country
+        address
+        houseNumber
+        postalCode
+        city
+      }
       createdAt
       updatedAt
     }
   }
 `;
+
+export const UPDATE_ADMIN_PROFILE = gql`
+mutation UpdateAdminProfile($drivingSchoolName: String!, $contactPerson: String!, $phone: String!, $email: String!, $address: AddressInput!) {
+  updateAdminProfile(drivingSchoolName: $drivingSchoolName, contactPerson: $contactPerson, phone: $phone, email: $email, address: $address) {
+    _id
+    email
+    drivingSchoolName
+    partnerId
+    contactPerson
+    phone
+    address {
+      country
+      address
+      houseNumber
+      postalCode
+      city
+    }
+    createdAt
+    updatedAt
+  }
+}`;
 
 
 export const DELETE_ADMIN = gql`
@@ -21,8 +53,8 @@ mutation DeleteAdmin($_id: String!) {
 }`
 
 
-export const REGISTER_USER = gql`mutation Register($firstName: String!, $lastName: String!, $email: String!, $role: Role!, $password: String!, $phone: String!, $address: AddressInput!) {
-  register(firstName: $firstName, lastName: $lastName, email: $email, role: $role, password: $password, phone: $phone, address: $address) {
+export const REGISTER_USER = gql`mutation Register($firstName: String!, $lastName: String!, $email: String!, $role: Role!, $password: String!, $address: AddressInput!) {
+  register(firstName: $firstName, lastName: $lastName, email: $email, role: $role, password: $password, address: $address) {
     _id
     firstName
     lastName
@@ -64,8 +96,8 @@ export const USERREGISTERBYADMIN = gql`mutation UserRegisterByAdmin($userId: Str
   }
 }`
 
-export const MAKE_CASH_PAYMENT = gql`mutation MakeCashPayment($userId: ID!, $languageCode: String!, $classes: [String!]!, $examLanguage: String!, $learningLanguage: String) {
-  makeCashPayment(userId: $userId, languageCode: $languageCode, classes: $classes, examLanguage: $examLanguage, learningLanguage: $learningLanguage) {
+export const MAKE_CASH_PAYMENT = gql`mutation MakeCashPayment($userId: ID!, $languageCode: String!, $classes: [String!]!, $examLanguage: String!, $learningLanguage: String, $learningFor: String!, $acquiredClasses: [String!]) {
+  makeCashPayment(userId: $userId, languageCode: $languageCode, classes: $classes, examLanguage: $examLanguage, learningLanguage: $learningLanguage, learningFor: $learningFor, acquiredClasses: $acquiredClasses) {
     _id
     method
     paymentId
@@ -90,17 +122,22 @@ export const VERIFYUSER = `mutation VerifyUser($userId: String!, $verificationTo
   }
 }`
 
-export const UPDATE_PRICE = gql`mutation UpdatePrice($vat: Float!, $dlApprovedLanguages: Float!,  $dlNonApprovedLanguages: Float!,  $bkfApprovedLanguages: Float!,  $bkfNonApprovedLanguages: Float!,  $_id: ID) {
-  updatePrice(vat: $vat, dlApprovedLanguages: $dlApprovedLanguages, dlNonApprovedLanguages: $dlNonApprovedLanguages, bkfApprovedLanguages: $bkfApprovedLanguages, bkfNonApprovedLanguages: $bkfNonApprovedLanguages,  _id: $_id) {
+export const UPDATE_PRICE = gql`mutation UpdatePrice($vat: Float!, $dlApprovedLanguages: Float!,  $dlNonApprovedLanguages: Float!,  $bkfApprovedLanguages: Float!,  $bkfNonApprovedLanguages: Float!, $pricePerRegisteredStudent: Float!,  $_id: ID) {
+  updatePrice(vat: $vat, dlApprovedLanguages: $dlApprovedLanguages, dlNonApprovedLanguages: $dlNonApprovedLanguages, bkfApprovedLanguages: $bkfApprovedLanguages, bkfNonApprovedLanguages: $bkfNonApprovedLanguages, pricePerRegisteredStudent: $pricePerRegisteredStudent,  _id: $_id) {
     _id
     vat
     dlApprovedLanguages
     dlNonApprovedLanguages
     bkfApprovedLanguages
     bkfNonApprovedLanguages
+    pricePerRegisteredStudent
     createdAt
     updatedAt
   }
+}`
+
+export const GENERATE_MONTHLY_INVOICE_PDF = gql`mutation GenerateMonthlyInvoicePdf($month: Int!, $year: Int!) {
+  generateMonthlyInvoicePdf(month: $month, year: $year)
 }`
 
 
@@ -174,8 +211,38 @@ mutation Mutation {
   logout
 }`
 
+export const CHANGE_PASSWORD = gql`mutation ChangeAdminPassword($currentPassword: String!, $newPassword: String!) {
+  changeAdminPassword(currentPassword: $currentPassword, newPassword: $newPassword)
+}`
+
+export const UPSERT_SEPA_MANDATE = gql`mutation UpsertSepaMandate($_id: ID, $status: String!, $mandateReference: String!, $version: String!, $signedOn: Float!, $fileKey: String!) {
+  upsertSepaMandate(_id: $_id, status: $status, mandateReference: $mandateReference, version: $version, signedOn: $signedOn, fileKey: $fileKey) {
+    _id
+    status
+    mandateReference
+    version
+    signedOn
+    fileKey
+    createdAt
+    updatedAt
+  }
+}`
+
 export const UPDATE_BKF_QUESTION = gql`
 mutation UpdateBkfQuestion($_id: ID!, $points: Float!, $questionType: String!, $questionNumber: String!, $classes: [String!]!, $chapters: [String!]!, $options: [OptionInput], $questionData: [BkfQuestionDataInput!]!, $solution: String, $solution1: String, $imageUrl: String) {
   updateBkfQuestion(_id: $_id, points: $points, questionType: $questionType, questionNumber: $questionNumber, classes: $classes, chapters: $chapters, options: $options, questionData: $questionData, solution: $solution, solution1: $solution1, imageUrl: $imageUrl)
 }
 `
+
+export const UPSERT_BANK_ACCOUNT = gql`mutation UpsertBankAccount($accountHolder: String!, $iban: String!, $bic: String!, $bankName: String!) {
+  upsertBankAccount(accountHolder: $accountHolder, iban: $iban, bic: $bic, bankName: $bankName) {
+    _id
+    adminId
+    accountHolder
+    iban
+    bic
+    bankName
+    createdAt
+    updatedAt
+  }
+}`

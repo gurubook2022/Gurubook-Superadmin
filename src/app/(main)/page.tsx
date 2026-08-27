@@ -7,7 +7,7 @@ const page = async () => {
   const session = await getServerAuthSession();
 
   if (!session) redirect("/sign-in");
-  if (session?.user?.role === "ADMIN") redirect("/users");
+  if (session?.user?.role === "ADMIN") redirect("/overview");
   if (session?.user?.role === "SUPERADMIN") redirect("/dashboard");
 };
 

@@ -24,6 +24,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
         graphQLErrors.forEach(({ message, locations, path, extensions }) => {
 
             if (extensions?.code === 'UN_AUTHORIZED') {
+                // INVALID_CREDENTIALS (e.g. wrong current password) is a separate code, so it's not caught here.
                 if (!window.location.pathname.includes('/sign-out')) {
                     window.location.href = '/sign-out';
                 }

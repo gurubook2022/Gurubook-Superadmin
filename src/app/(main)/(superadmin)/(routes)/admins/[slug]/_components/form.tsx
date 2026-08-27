@@ -44,17 +44,55 @@ const Form = ({ initialData }: FormProps) => {
       firstName: initialData?.firstName || "",
       lastName: initialData?.lastName || "",
       password: "",
+      drivingSchoolName: initialData?.drivingSchoolName || "",
+      contactPerson: initialData?.contactPerson || "",
+      phone: initialData?.phone || "",
+      country: initialData?.address?.country || "GERMANY",
+      address: initialData?.address?.address || "",
+      houseNumber: initialData?.address?.houseNumber || "",
+      postalCode: initialData?.address?.postalCode
+        ? String(initialData.address.postalCode)
+        : "",
+      city: initialData?.address?.city || "",
     },
   });
 
   const onSubmit = async (data: AdminInput) => {
-    const { email, firstName, lastName, password } = data;
+    const {
+      email,
+      firstName,
+      lastName,
+      password,
+      drivingSchoolName,
+      contactPerson,
+      phone,
+      country,
+      address: streetAddress,
+      houseNumber,
+      postalCode,
+      city,
+    } = data;
     const toastId = toast.loading("Creating Admin", {
       position: "bottom-left",
     });
     try {
       await registerAdmin({
-        variables: { email, firstName, lastName, password },
+        variables: {
+          email,
+          firstName,
+          lastName,
+          password,
+          drivingSchoolName,
+          contactPerson,
+          phone,
+          address: {
+            country,
+            address: streetAddress,
+            houseNumber,
+            postalCode: Number(postalCode),
+            city,
+          },
+        },
       });
     } catch (error: any) {
       handleGraphqlErrors(error);
@@ -108,6 +146,75 @@ const Form = ({ initialData }: FormProps) => {
           {...register(`password`)}
           error={errors?.password?.message}
         />
+
+        <div className="col-span-4 space-y-2.5">
+          <Title className="text-lg">Driving School Profile</Title>
+          <div className="gap-2 sm:gap-6 grid grid-cols-4">
+            <Input
+              label="Driving School Name"
+              placeholder="Driving School Name"
+              {...register(`drivingSchoolName`)}
+              error={errors?.drivingSchoolName?.message}
+              helperClassName="border-4"
+            />
+            <Input
+              label="Contact Person"
+              placeholder="Contact Person"
+              {...register(`contactPerson`)}
+              error={errors?.contactPerson?.message}
+              helperClassName="border-4"
+            />
+            <Input
+              label="Phone"
+              placeholder="Phone"
+              {...register(`phone`)}
+              error={errors?.phone?.message}
+              helperClassName="border-4"
+            />
+          </div>
+        </div>
+
+        <div className="col-span-4 space-y-2.5">
+          <Title className="text-lg">Address</Title>
+          <div className="gap-2 sm:gap-6 grid grid-cols-4">
+            <Input
+              label="Address"
+              placeholder="Street"
+              {...register(`address`)}
+              error={errors?.address?.message}
+              helperClassName="border-4"
+            />
+            <Input
+              label="House Number"
+              placeholder="House Number"
+              {...register(`houseNumber`)}
+              error={errors?.houseNumber?.message}
+              helperClassName="border-4"
+            />
+            <Input
+              label="Postal Code"
+              placeholder="Postal Code"
+              {...register(`postalCode`)}
+              error={errors?.postalCode?.message}
+              helperClassName="border-4"
+            />
+            <Input
+              label="City"
+              placeholder="City"
+              {...register(`city`)}
+              error={errors?.city?.message}
+              helperClassName="border-4"
+            />
+            <Input
+              label="Country"
+              placeholder="Country"
+              {...register(`country`)}
+              error={errors?.country?.message}
+              helperClassName="border-4"
+            />
+          </div>
+        </div>
+
         <Button
           variant="solid"
           color="primary"

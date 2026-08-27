@@ -50,6 +50,10 @@ export function handleGraphqlErrors(error: ApolloError) {
           toast.error(`${capitalizeFirstLetter(variableWithQutations)} is required`, {
             position: "bottom-left"
           })
+        } else {
+          toast.error(error.message, {
+            position: "bottom-left"
+          })
         }
       })
       return;
@@ -176,3 +180,6 @@ export const chunkArray = <T,>(arr: T[], size: number): T[][] => {
 
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+export const getS3FileUrl = (key: string) =>
+  `https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${key}`;

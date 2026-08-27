@@ -41,6 +41,8 @@ const Form = ({ initialData }: FormProps) => {
         String(initialData?.bkfNonApprovedLanguages) || "",
       bkfApprovedLanguages: String(initialData?.bkfApprovedLanguages) || "",
       vat: String(initialData?.vat) || "",
+      pricePerRegisteredStudent:
+        String(initialData?.pricePerRegisteredStudent) || "",
     },
   });
 
@@ -51,6 +53,7 @@ const Form = ({ initialData }: FormProps) => {
       bkfApprovedLanguages,
       bkfNonApprovedLanguages,
       vat,
+      pricePerRegisteredStudent,
     } = data;
     const toastId = toast.loading(
       initialData ? "Updating Prices" : "Creating Prices",
@@ -66,6 +69,7 @@ const Form = ({ initialData }: FormProps) => {
           bkfApprovedLanguages: Number(bkfApprovedLanguages),
           bkfNonApprovedLanguages: Number(bkfNonApprovedLanguages),
           vat: Number(vat),
+          pricePerRegisteredStudent: Number(pricePerRegisteredStudent),
           _id: initialData?._id,
         },
         onCompleted: () => {
@@ -151,6 +155,19 @@ const Form = ({ initialData }: FormProps) => {
               placeholder="Non Approved  LANGUAGES"
               {...register(`bkfNonApprovedLanguages`)}
               error={errors?.bkfNonApprovedLanguages?.message}
+              helperClassName="border-4"
+              type="number"
+            />
+          </div>
+        </div>
+        <div className="sm:col-span-2 lg:col-span-4 space-y-2.5">
+          <Title>Billing</Title>
+          <div className="sm:col-span-2 lg:col-span-4 gap-2 sm:gap-6 grid sm:grid-cols-2 lg:grid-cols-4">
+            <Input
+              label="Price per Registered Student (€)"
+              placeholder="Price per Registered Student"
+              {...register(`pricePerRegisteredStudent`)}
+              error={errors?.pricePerRegisteredStudent?.message}
               helperClassName="border-4"
               type="number"
             />

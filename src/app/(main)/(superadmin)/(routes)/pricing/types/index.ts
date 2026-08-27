@@ -5,6 +5,7 @@ export interface Price {
     dlNonApprovedLanguages: number
     bkfApprovedLanguages: number
     bkfNonApprovedLanguages: number
+    pricePerRegisteredStudent: number
     createdAt: number
     updatedAt: number
 }

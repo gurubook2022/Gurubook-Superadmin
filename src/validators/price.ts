@@ -6,6 +6,7 @@ export const priceFormSchema = z.object({
     dlNonApprovedLanguages: z.string().min(0, { message: "Required" }),
     bkfApprovedLanguages: z.string().min(0, { message: "Required" }),
     bkfNonApprovedLanguages: z.string().min(0, { message: "Required" }),
+    pricePerRegisteredStudent: z.string().min(0, { message: "Required" }),
 });
 
 export type PriceInput = z.infer<typeof priceFormSchema>;

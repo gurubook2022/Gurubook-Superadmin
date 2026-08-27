@@ -1,9 +1,22 @@
+export type AddressT = {
+    country: string;
+    address: string;
+    houseNumber: string;
+    postalCode: number;
+    city: string;
+};
+
 export type AdminT = {
     _id: string;
     firstName: string;
     lastName: string;
     email: string;
     role: string;
+    drivingSchoolName?: string;
+    partnerId?: number;
+    contactPerson?: string;
+    phone?: string;
+    address?: AddressT;
     createdAt: number;
     updatedAt: number;
 };

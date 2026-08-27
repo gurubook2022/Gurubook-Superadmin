@@ -11,6 +11,9 @@ import {
   UsersIcon,
   Images,
   BarChartHorizontalIcon,
+  SettingsIcon,
+  ShieldCheckIcon,
+  ReceiptIcon,
 } from "lucide-react";
 import Logout from "./logout";
 import { useSession } from "next-auth/react";
@@ -60,15 +63,39 @@ const superadminItems = [
     title: "Analytics",
     href: "/analytics",
     icon: BarChartHorizontalIcon,
+  },
+  {
+    id: "a1b2c3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+    title: "SEPA Mandate",
+    href: "/sepa-mandate",
+    icon: ShieldCheckIcon,
   }
 ];
 
 const adminItems = [
   {
+    id: "a2c8b117-1e6d-4b0a-9f3c-2d5a6e8f0b1c",
+    title: "Dashboard",
+    href: "/overview",
+    icon: LayoutDashboardIcon,
+  },
+  {
     id: "c996b007-fccc-47dc-8e3f-4e33ef571fh0",
     title: "Users",
     href: "/users",
     icon: UsersIcon,
+  },
+  {
+    id: "f3a5c6a1-9e2d-4b3a-9c1f-6d8b2a7e4f10",
+    title: "Settings",
+    href: "/settings",
+    icon: SettingsIcon,
+  },
+  {
+    id: "b7d4e2a9-3c1f-4d8a-9e6b-1a2c3d4e5f6a",
+    title: "Billing & Invoices",
+    href: "/billing-invoices",
+    icon: ReceiptIcon,
   },
 ];
 

@@ -40,17 +40,17 @@
     /* primary/brand colors */
     /* ----------------------------------- */
 
-    /* For rgb(217 255 255 / <alpha-value>) = #43ffe1 */
-    --primary-lighter: 67 255 255;
+    /* For rgb(224 231 255 / <alpha-value>) = #e0e7ff */
+    --primary-lighter: 224 231 255;
 
-    /* For rgb(44 211 255 / <alpha-value>) = #0cf5d0 */
-    --primary-light: 12 245 208;
+    /* For rgb(129 140 248 / <alpha-value>) = #818cf8 */
+    --primary-light: 129 140 248;
 
-    /* For rgb(1 196 255 / <alpha-value>) = #6366f1 */
-    --primary-default: 2 115 104;
+    /* For rgb(99 102 241 / <alpha-value>) = #6366f1 */
+    --primary-default: 99 102 241;
 
-    /* For rgb(0 153 212 / <alpha-value>) = #008a7b */
-    --primary-dark: 0 138 123;
+    /* For rgb(79 70 229 / <alpha-value>) = #4f46e5 */
+    --primary-dark: 79 70 229;
 
     /* ----------------------------------- */
     /* secondary colors */

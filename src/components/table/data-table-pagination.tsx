@@ -8,22 +8,50 @@ import {
   ChevronsRight,
 } from "lucide-react";
 import Select from "../ui/select";
+import { cn } from "@/lib/utils";
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
+  itemsLabel?: string;
 }
+
+type PageToken = number | "ellipsis";
+
+const getPageTokens = (current: number, total: number): PageToken[] => {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+
+  const tokens: PageToken[] = [1];
+  if (current > 3) tokens.push("ellipsis");
+
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  for (let i = start; i <= end; i++) tokens.push(i);
+
+  if (current < total - 2) tokens.push("ellipsis");
+  tokens.push(total);
+
+  return tokens;
+};
 
 export function DataTablePagination<TData>({
   table,
+  itemsLabel = "results",
 }: DataTablePaginationProps<TData>) {
+  const { pageIndex, pageSize } = table.getState().pagination;
+  const totalRows = table.getFilteredRowModel().rows.length;
+  const pageCount = table.getPageCount();
+  const startRow = totalRows === 0 ? 0 : pageIndex * pageSize + 1;
+  const endRow = Math.min((pageIndex + 1) * pageSize, totalRows);
+  const pageTokens = getPageTokens(pageIndex + 1, pageCount);
+
   return (
-    <div className="flex items-center space-x-6 justify-between lg:space-x-8">
-      <div className="flex flex-col sm:flex-row  items-start gap-2 sm:items-center  sm:flex-1">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col sm:flex-row items-start gap-2 sm:items-center">
         <p className="text-sm font-medium">Rows per page</p>
         <Select
           size="sm"
           variant="flat"
-          value={`${table.getState().pagination.pageSize}`}
+          value={`${pageSize}`}
           onChange={(value: { name: string; value: number }) => {
             table.setPageSize(value.value);
           }}
@@ -37,10 +65,12 @@ export function DataTablePagination<TData>({
           ]}
         />
       </div>
-      <div className="flex flex-col sm:flex-row sm:items-center items-end justify-end gap-2 sm:gap-8 flex-1">
-        <div className="flex w-auto items-center justify-center text-sm font-medium">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
+
+      <div className="flex flex-col sm:flex-row sm:items-center items-start gap-2 sm:gap-4">
+        <div className="text-sm text-gray-500 whitespace-nowrap">
+          {totalRows === 0
+            ? `No ${itemsLabel}`
+            : `Showing ${startRow} to ${endRow} of ${totalRows} ${itemsLabel}`}
         </div>
         <div className="flex items-center space-x-2">
           <Button
@@ -61,6 +91,32 @@ export function DataTablePagination<TData>({
             <span className="sr-only">Go to previous page</span>
             <ChevronLeft className="h-4 w-4" />
           </Button>
+
+          {pageTokens.map((token, index) =>
+            token === "ellipsis" ? (
+              <span
+                key={`ellipsis-${index}`}
+                className="flex h-8 w-8 items-center justify-center text-sm text-gray-400"
+              >
+                ...
+              </span>
+            ) : (
+              <button
+                key={token}
+                type="button"
+                onClick={() => table.setPageIndex(token - 1)}
+                className={cn(
+                  "h-8 w-8 rounded-md border text-sm font-medium transition-colors",
+                  token === pageIndex + 1
+                    ? "border-primary bg-primary text-white"
+                    : "border-gray-300 bg-gray-0 text-gray-700 hover:border-primary"
+                )}
+              >
+                {token}
+              </button>
+            )
+          )}
+
           <Button
             variant="outline"
             className="h-8 w-8 p-0"

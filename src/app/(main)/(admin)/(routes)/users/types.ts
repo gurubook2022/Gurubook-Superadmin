@@ -4,12 +4,16 @@ export type UserT = {
     lastName: string;
     email: string;
     role: string;
+    isVerified: boolean;
+    status: boolean;
     createdAt: number;
     updatedAt: number;
     payment?: PaymentT;
     classes: string[];
     examLanguage: string;
     learningLanguage: string;
+    lastLoginAt: number | null;
+    progress: number;
 };
 
 export type PaymentT = {

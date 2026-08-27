@@ -35,6 +35,24 @@ export const GET_BKF_SOLO_QUESTION_DETAILS = `query GetBkfSoloQuestionDetails($_
   getBkfSoloQuestionDetails(_id: $_id)
 }`
 
+export const GET_INVOICES = `
+query Query {
+  getInvoices {
+    _id
+    userId
+    description
+    invoiceNumber
+    unitPrice
+    vatPercentage
+    createdAt
+    updatedAt
+    name
+    email
+    address
+  }
+}`
+
+
 export const GET_ALL_ADMINS = `
 query Query {
   getAllAdmins {
@@ -124,6 +142,8 @@ export const GET_USERS_REGISTERED_BY_ADMIN = `query GetUsersRegisteredByAdmin($a
     examLanguage
     learningLanguage
     classes
+    lastLoginAt
+    progress
   }
 }`
 
@@ -135,8 +155,47 @@ export const GET_PRICES = `query GetPrices {
     dlNonApprovedLanguages
     bkfApprovedLanguages
     bkfNonApprovedLanguages
+    pricePerRegisteredStudent
     createdAt
     updatedAt
+  }
+}`
+
+const MONTHLY_INVOICE_FIELDS = `
+    month
+    year
+    status
+    periodLabel
+    finalizedOn
+    invoiceNumber
+    studentsCount
+    netAmount
+    vatPercentage
+    totalAmount
+    pdfKey
+    students {
+      accountId
+      name
+      licenceType
+      existingClasses
+      learningForClasses
+      examLanguage
+      learningLanguage
+      createdOn
+      price
+      status
+    }
+`
+
+export const GET_CURRENT_MONTHLY_INVOICE = `query GetCurrentMonthlyInvoice {
+  getCurrentMonthlyInvoice {
+    ${MONTHLY_INVOICE_FIELDS}
+  }
+}`
+
+export const GET_PREVIOUS_MONTHLY_INVOICES = `query GetPreviousMonthlyInvoices($monthsBack: Int) {
+  getPreviousMonthlyInvoices(monthsBack: $monthsBack) {
+    ${MONTHLY_INVOICE_FIELDS}
   }
 }`
 
@@ -163,5 +222,53 @@ export const GET_LANGUAGES_CHART_DATA = `query GetLanguagesChartData {
     languageTitle
     languageCode
     count
+  }
+}`
+
+export const GET_BANK_ACCOUNT = `query GetBankAccount {
+  getBankAccount {
+    _id
+    adminId
+    accountHolder
+    iban
+    bic
+    bankName
+    createdAt
+    updatedAt
+  }
+}`
+
+export const GET_SEPA_MANDATE = `query GetSepaMandate {
+  getSepaMandate {
+    _id
+    status
+    mandateReference
+    version
+    signedOn
+    fileKey
+    createdAt
+    updatedAt
+  }
+}`
+
+export const GET_ADMIN_PROFILE = `query GetAdminProfile {
+  getAdminProfile {
+    _id
+    firstName
+    lastName
+    email
+    drivingSchoolName
+    partnerId
+    contactPerson
+    phone
+    address {
+      country
+      address
+      houseNumber
+      postalCode
+      city
+    }
+    createdAt
+    updatedAt
   }
 }`

@@ -46,8 +46,14 @@ export const authOptions: NextAuthOptions = {
                         variables: { email, password },
                     });
 
+                    const role = login?.user?.role;
+
+                    if (role !== "ADMIN" && role !== "SUPERADMIN") {
+                        return null;
+                    }
+
                     const user = {
-                        role: login?.user?.role,
+                        role,
                         email: login?.user?.email,
                         _id: login?.user?._id,
                         refreshToken: login?.refreshToken,
